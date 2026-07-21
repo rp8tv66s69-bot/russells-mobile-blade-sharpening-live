@@ -7,30 +7,10 @@ import { db } from "@/lib/firebase";
 import type { Booking } from "@/lib/types";
 
 const services = [
-  {
-    id: "push-mower",
-    name: "Push Mower",
-    detail: "1 blade",
-    price: 20,
-  },
-  {
-    id: "riding-mower",
-    name: "Riding Mower",
-    detail: "2 blades",
-    price: 40,
-  },
-  {
-    id: "zero-turn",
-    name: "Zero Turn",
-    detail: "3 blades",
-    price: 60,
-  },
-  {
-    id: "bush-hog",
-    name: "Bush Hog",
-    detail: "2 blades",
-    price: 80,
-  },
+  { id: "push-mower", name: "Push Mower", detail: "1 blade", price: 20 },
+  { id: "riding-mower", name: "Riding Mower", detail: "2 blades", price: 40 },
+  { id: "zero-turn", name: "Zero Turn", detail: "3 blades", price: 60 },
+  { id: "bush-hog", name: "Bush Hog", detail: "2 blades", price: 80 },
 ];
 
 const times = [
@@ -86,6 +66,7 @@ function slotId(date: string, time: string) {
 
 export default function BookingPage() {
   const dates = useMemo(() => nextAvailableDates(), []);
+
   const [submitted, setSubmitted] = useState<Booking | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -169,7 +150,8 @@ export default function BookingPage() {
       });
 
       if (!emailResponse.ok) {
-        console.error("Booking saved, but notification email failed.");
+        const emailError = await emailResponse.text();
+        console.error("Notification email failed:", emailError);
       }
 
       formElement.reset();
@@ -189,10 +171,21 @@ export default function BookingPage() {
       <main className="booking-shell">
         <section className="confirmation-card">
           <h1>Thank you, {submitted.name}!</h1>
+
           <p>Your appointment request has been received.</p>
+
           <p>
             Russell will contact you to confirm your appointment for{" "}
-            <strong>{submitted.serviceName}</strong>.
+            <strong>
+              {submitted.serviceName} ({submitted.serviceDetail})
+            </strong>
+            .
+          </p>
+
+          <p>
+            <strong>Date:</strong> {submitted.date}
+            <br />
+            <strong>Time:</strong> {submitted.time}
           </p>
 
           <div className="hero-actions">
@@ -239,6 +232,7 @@ export default function BookingPage() {
         <section className="form-card">
           <div className="form-section-heading">
             <span>1</span>
+
             <div>
               <h2>Choose a service</h2>
               <p>Select the equipment you need sharpened.</p>
@@ -254,10 +248,12 @@ export default function BookingPage() {
                   name="service"
                   value={service.id}
                 />
+
                 <span>
                   <strong>{service.name}</strong>
                   <small>{service.detail}</small>
                 </span>
+
                 <b>${service.price}</b>
               </label>
             ))}
@@ -267,6 +263,7 @@ export default function BookingPage() {
         <section className="form-card">
           <div className="form-section-heading">
             <span>2</span>
+
             <div>
               <h2>Select a date and time</h2>
               <p>Appointments are available Friday and Saturday.</p>
@@ -276,6 +273,7 @@ export default function BookingPage() {
           <div className="field-grid">
             <label>
               <span>Appointment date</span>
+
               <select name="date" required defaultValue="">
                 <option value="" disabled>
                   Choose a date
@@ -291,13 +289,16 @@ export default function BookingPage() {
 
             <label>
               <span>Appointment time</span>
+
               <select name="time" required defaultValue="">
                 <option value="" disabled>
                   Choose a time
                 </option>
 
                 {times.map((time) => (
-                  <option key={time}>{time}</option>
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
                 ))}
               </select>
             </label>
@@ -307,6 +308,7 @@ export default function BookingPage() {
         <section className="form-card">
           <div className="form-section-heading">
             <span>3</span>
+
             <div>
               <h2>Your information</h2>
               <p>Russell will use this information to confirm your visit.</p>
@@ -331,13 +333,16 @@ export default function BookingPage() {
 
             <label>
               <span>City *</span>
+
               <select name="city" required defaultValue="">
                 <option value="" disabled>
                   Choose your city
                 </option>
 
                 {serviceAreas.map((area) => (
-                  <option key={area}>{area}</option>
+                  <option key={area} value={area}>
+                    {area}
+                  </option>
                 ))}
               </select>
             </label>
@@ -349,6 +354,7 @@ export default function BookingPage() {
 
             <label className="full-field">
               <span>Notes</span>
+
               <textarea
                 name="notes"
                 rows={4}
@@ -370,7 +376,7 @@ export default function BookingPage() {
             <p>Pay after service with Cash, Cash App, or Venmo.</p>
           </div>
 
-          <button className="button primary" disabled={saving}>
+          <button className="button primary" type="submit" disabled={saving}>
             {saving ? "Saving appointment..." : "Request appointment"}
           </button>
         </section>

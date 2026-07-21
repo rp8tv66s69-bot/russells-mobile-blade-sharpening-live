@@ -1,0 +1,22 @@
+export type BookingStatus = "Pending" | "Confirmed" | "Completed" | "Cancelled";
+export type PaymentStatus = "Unpaid" | "Paid";
+
+export type Booking = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  serviceId: string;
+  serviceName: string;
+  serviceDetail: string;
+  price: number;
+  date: string;
+  time: string;
+  notes: string;
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
+  paymentMethod: "" | "Cash" | "Cash App" | "Venmo";
+  createdAt: string;
+};

@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /bookings/{bookingId} {
+      allow create: if !exists(/databases/$(database)/documents/bookings/$(bookingId))
+        && request.resource.data.status == "Pending"
+        && request.resource.data.paymentStatus == "Unpaid"
+        && request.resource.data.price in [20, 40, 60, 80]
+        && request.resource.data.city in ["Covington", "Mandeville", "Madisonville"];
+      allow read, update, delete: if request.auth != null;
+    }
+  }
+}

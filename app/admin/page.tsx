@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [filter, setFilter] = useState<Filter>("Today");
   const [search, setSearch] = useState("");
   const [dataError, setDataError] = useState("");
+  const [sendingConfirmation, setSendingConfirmation] = useState<string | null>(null);
 
   useEffect(() => onAuthStateChanged(auth, (current) => {
     setUser(current);
@@ -95,6 +96,59 @@ export default function AdminPage() {
     return true;
   }), [bookings, filter, search, today]);
 
+  async function sendConfirmation(booking: Booking) {
+    if (!booking.email) {
+      window.alert("This customer did not provide an email address.");
+      return false;
+    }
+
+    if (!user) {
+      window.alert("Your owner session has expired. Please sign in again.");
+      return false;
+    }
+
+    setSendingConfirmation(booking.id);
+
+    try {
+      const idToken = await user.getIdToken(true);
+      const response = await fetch("/api/booking-confirmation", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: booking.id,
+          name: booking.name,
+          email: booking.email,
+          serviceName: booking.serviceName,
+          serviceDetail: booking.serviceDetail,
+          price: booking.price,
+          date: booking.date,
+          time: booking.time,
+          address: booking.address,
+          city: booking.city,
+        }),
+      });
+
+      if (!response.ok) {
+        const emailError = await response.text();
+        console.error("Confirmation email failed:", emailError);
+        window.alert("The customer confirmation email could not be sent.");
+        return false;
+      }
+
+      window.alert(`Confirmation email sent to ${booking.email}.`);
+      return true;
+    } catch (error) {
+      console.error(error);
+      window.alert("The customer confirmation email could not be sent.");
+      return false;
+    } finally {
+      setSendingConfirmation(null);
+    }
+  }
+
   async function update(booking: Booking, fields: Partial<Booking>) {
     try {
       await updateDoc(doc(db, "bookings", booking.id), fields);
@@ -103,48 +157,7 @@ export default function AdminPage() {
         fields.status === "Confirmed" && booking.status !== "Confirmed";
 
       if (isNewConfirmation) {
-        if (!booking.email) {
-          window.alert(
-            "The appointment was confirmed, but this customer did not provide an email address."
-          );
-          return;
-        }
-
-        if (!user) {
-          throw new Error("Owner session is unavailable.");
-        }
-
-        const idToken = await user.getIdToken();
-        const response = await fetch("/api/booking-confirmation", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: booking.id,
-            name: booking.name,
-            email: booking.email,
-            serviceName: booking.serviceName,
-            serviceDetail: booking.serviceDetail,
-            price: booking.price,
-            date: booking.date,
-            time: booking.time,
-            address: booking.address,
-            city: booking.city,
-          }),
-        });
-
-        if (!response.ok) {
-          const emailError = await response.text();
-          console.error("Confirmation email failed:", emailError);
-          window.alert(
-            "The appointment was confirmed, but the customer email could not be sent."
-          );
-          return;
-        }
-
-        window.alert("Appointment confirmed and customer email sent.");
+        await sendConfirmation(booking);
       }
     } catch (error) {
       console.error(error);
@@ -231,7 +244,7 @@ export default function AdminPage() {
               </div>
               <div className="booking-card-grid"><div><span>Address</span><p>{booking.address}, {booking.city}</p></div><div><span>Contact</span><p><a href={`tel:${booking.phone}`}>{booking.phone}</a>{booking.email && <><br /><a href={`mailto:${booking.email}`}>{booking.email}</a></>}</p></div><div><span>Notes</span><p>{booking.notes || "None"}</p></div></div>
               <div className="management-row"><label>Status<select value={booking.status} onChange={(e) => update(booking, { status: e.target.value as BookingStatus })}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Payment<select value={booking.paymentStatus} onChange={(e) => update(booking, { paymentStatus: e.target.value as PaymentStatus })}><option>Unpaid</option><option>Paid</option></select></label><label>Method<select value={booking.paymentMethod || ""} onChange={(e) => update(booking, { paymentMethod: e.target.value as Booking["paymentMethod"] })}>{paymentMethods.map((item) => <option key={item} value={item}>{item || "Not selected"}</option>)}</select></label></div>
-              <div className="card-actions"><a className="button primary small" href={`tel:${booking.phone}`}>Call</a><a className="button secondary small" href={`sms:${booking.phone}`}>Text</a><a className="button secondary small" href={`sms:${booking.phone}?body=${onMyWay}`}>I&apos;m on my way</a><a className="button secondary small" href={`sms:${booking.phone}?body=${reviewRequest}`}>Review message</a><a className="button secondary small" target="_blank" rel="noreferrer" href={mapsSearchUrl(booking)}>Directions</a><button className="button danger small" onClick={() => remove(booking.id)}>Delete</button></div>
+              <div className="card-actions"><a className="button primary small" href={`tel:${booking.phone}`}>Call</a><a className="button secondary small" href={`sms:${booking.phone}`}>Text</a>{booking.email && <button className="button secondary small" type="button" disabled={sendingConfirmation === booking.id} onClick={() => sendConfirmation(booking)}>{sendingConfirmation === booking.id ? "Sending email..." : "Send confirmation email"}</button>}<a className="button secondary small" href={`sms:${booking.phone}?body=${onMyWay}`}>I&apos;m on my way</a><a className="button secondary small" href={`sms:${booking.phone}?body=${reviewRequest}`}>Review message</a><a className="button secondary small" target="_blank" rel="noreferrer" href={mapsSearchUrl(booking)}>Directions</a><button className="button danger small" onClick={() => remove(booking.id)}>Delete</button></div>
             </article>;
           })}
         </section>

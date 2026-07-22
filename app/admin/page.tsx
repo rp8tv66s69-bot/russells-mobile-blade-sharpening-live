@@ -122,6 +122,7 @@ export default function AdminPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            id: booking.id,
             name: booking.name,
             email: booking.email,
             serviceName: booking.serviceName,

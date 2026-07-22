@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const OWNER_EMAIL = "rtaylorusa@bellsouth.net";
-// Firebase web API keys identify the project and are safe to include in web
-// application source. Keep this synchronized with lib/firebase.ts.
-const FIREBASE_WEB_API_KEY = "AIzaSyAWAU1httOrLUZEpvG4fkcvJing-e_T_68";
+const FIREBASE_PROJECT_ID = "russell-s-mobile-blade";
 
 type ConfirmationRequest = {
+  id?: string;
   name?: string;
   email?: string;
   serviceName?: string;
@@ -27,35 +25,32 @@ function escapeHtml(value: unknown) {
     .replaceAll("'", "&#039;");
 }
 
-async function authenticatedOwner(request: Request) {
+async function ownerCanReadBooking(request: Request, bookingId: string) {
   const authorization = request.headers.get("authorization") || "";
   const token = authorization.startsWith("Bearer ")
     ? authorization.slice("Bearer ".length)
     : "";
-  if (!token) return false;
+  if (!token || !bookingId) return false;
 
   const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_WEB_API_KEY}`,
+    `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/bookings/${encodeURIComponent(bookingId)}`,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken: token }),
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     }
   );
 
-  if (!response.ok) return false;
-
-  const result = (await response.json()) as {
-    users?: Array<{ email?: string }>;
-  };
-
-  return result.users?.[0]?.email?.toLowerCase() === OWNER_EMAIL;
+  // Firestore applies the project's published security rules to this request.
+  // A successful read proves the caller has authenticated owner access.
+  return response.ok;
 }
 
 export async function POST(request: Request) {
   try {
-    if (!(await authenticatedOwner(request))) {
+    const booking = (await request.json()) as ConfirmationRequest;
+
+    if (!booking.id || !(await ownerCanReadBooking(request, booking.id))) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
@@ -67,8 +62,6 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-
-    const booking = (await request.json()) as ConfirmationRequest;
 
     if (
       !booking.name ||

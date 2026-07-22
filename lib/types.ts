@@ -21,6 +21,7 @@ export type Booking = {
   paymentStatus: PaymentStatus;
   paymentMethod: "" | "Cash" | "Cash App" | "Venmo";
   createdAt: string;
+  seasonalReminderSentAt?: string;
 };
 
 export type BlockedSlot = {

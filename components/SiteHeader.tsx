@@ -10,6 +10,7 @@ export default function SiteHeader() {
       <nav className="site-nav" aria-label="Main navigation">
         <Link href="/">Home</Link>
         <Link href="/#services">Services</Link>
+        <Link href="/#gallery">Before &amp; After</Link>
         <a href="tel:+19852951163">Contact</a>
         <Link className="nav-book" href="/book">Book now</Link>
         <Link className="nav-admin" href="/login">Owner</Link>

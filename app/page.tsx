@@ -36,9 +36,9 @@ export default function HomePage() {
 
       <section className="section page-width" id="services">
         <div className="section-heading">
-          <p className="eyebrow">Straightforward pricing</p>
+          <p className="eyebrow">Veteran Owned · Straightforward pricing</p>
           <h2>Sharpening services</h2>
-          <p className="section-lead">Mobile service in Covington, Mandeville, and Madisonville every Friday and Saturday.</p>
+          <p className="section-lead">Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
         </div>
         <div className="service-grid">
           {services.map(([name, detail, price]) => (
@@ -51,8 +51,8 @@ export default function HomePage() {
 
       <section className="section band">
         <div className="page-width split">
-          <div><p className="eyebrow light">Mobile convenience</p><h2>Stay home. Russell brings the sharpening service to you.</h2></div>
-          <div className="check-list"><p>✓ Friday and Saturday appointments</p><p>✓ Covington, Mandeville, and Madisonville</p><p>✓ Appointment confirmation after booking</p><p>✓ Cash, Cash App, or Venmo after service</p></div>
+          <div><p className="eyebrow light">Veteran Owned · Mobile convenience</p><h2>Stay home. Russell brings the sharpening service to you.</h2></div>
+          <div className="check-list"><p>✓ Veteran owned and operated</p><p>✓ Friday and Saturday appointments</p><p>✓ Washington, St. Tammany, and Tangipahoa Parishes</p><p>✓ Appointment confirmation after booking</p><p>✓ Cash, Cash App, or Venmo after service</p></div>
         </div>
       </section>
 

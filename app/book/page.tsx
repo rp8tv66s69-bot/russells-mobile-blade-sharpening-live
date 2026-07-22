@@ -26,7 +26,11 @@ const times = [
   "4:00 PM",
 ];
 
-const serviceAreas = ["Covington", "Mandeville", "Madisonville"];
+const serviceAreas = [
+  "Washington Parish",
+  "St. Tammany Parish",
+  "Tangipahoa Parish",
+];
 
 function nextAvailableDates(count = 12) {
   const dates: Date[] = [];
@@ -246,11 +250,11 @@ export default function BookingPage() {
       </header>
 
       <section className="booking-intro">
-        <p className="eyebrow">Online appointment request</p>
+        <p className="eyebrow">Veteran Owned · Online appointment request</p>
         <h1>Book mobile blade sharpening</h1>
         <p>
-          Friday and Saturday, 8:00 AM–5:00 PM in Covington, Mandeville,
-          and Madisonville.
+          Friday and Saturday, 8:00 AM–5:00 PM throughout Washington Parish,
+          St. Tammany Parish, and Tangipahoa Parish.
         </p>
       </section>
 
@@ -352,10 +356,10 @@ export default function BookingPage() {
             </label>
 
             <label>
-              <span>City *</span>
+              <span>Parish *</span>
               <select name="city" required defaultValue="">
                 <option value="" disabled>
-                  Choose your city
+                  Choose your parish
                 </option>
                 {serviceAreas.map((area) => (
                   <option key={area} value={area}>

@@ -41,7 +41,7 @@ export default function BeforeAfterGallery() {
           </div>
         )}
       </div>
-      <div className="gallery-promise"><strong>Every service includes precision sharpening.</strong><span>Your blades are returned ready for a cleaner, healthier-looking lawn.</span></div>
+      <div className="gallery-promise"><strong>Every service includes precision sharpening and balancing.</strong><span>Your blades are returned ready for a cleaner, healthier-looking lawn.</span></div>
     </section>
   );
 }

@@ -76,7 +76,7 @@ export default function HomePage() {
         <div><p className="eyebrow">Ready for a cleaner cut?</p><h2>Schedule your blades today.</h2><p>Your blades will be sharpened on site and ready for healthier, cleaner-looking grass.</p></div>
         <div className="hero-actions"><Link className="button orange" href="/book">Book online</Link><a className="button secondary" href="sms:+19852951163">Text Russell</a></div>
       </section>
-      <footer className="footer">Russell&apos;s Mobile Blade Sharpening · <a href="mailto:Rtaylorusa@bellsouth.net">Rtaylorusa@bellsouth.net</a> · <a href="tel:+19852951163">985-295-1163</a></footer>
+      <footer className="footer">Russell&apos;s Mobile Blade Sharpening · <a href="mailto:russellsmobileblade@gmail.com">russellsmobileblade@gmail.com</a> · <a href="tel:+19852951163">985-295-1163</a></footer>
     </main>
   );
 }

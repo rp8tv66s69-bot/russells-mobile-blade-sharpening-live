@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
 import { db } from "@/lib/firebase";
 import type { Booking } from "@/lib/types";
 
@@ -60,13 +61,29 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
+/**
+ * Every appointment slot has exactly one deterministic Firestore document ID.
+ * With the project's create-only public Firestore rule, the first write creates
+ * the slot and a later write to the same ID is rejected as an unauthorized
+ * update. This is atomic and prevents two customers from reserving one slot.
+ */
 function slotId(date: string, time: string) {
   return `${date}_${time.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
 }
 
+function isSlotConflict(error: unknown) {
+  if (!(error instanceof FirebaseError)) return false;
+
+  return (
+    error.code === "permission-denied" ||
+    error.code === "already-exists" ||
+    error.code === "firestore/permission-denied" ||
+    error.code === "firestore/already-exists"
+  );
+}
+
 export default function BookingPage() {
   const dates = useMemo(() => nextAvailableDates(), []);
-
   const [submitted, setSubmitted] = useState<Booking | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -78,7 +95,6 @@ export default function BookingPage() {
 
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-
     const selectedService = services.find(
       (service) => service.id === String(form.get("service") || "")
     );
@@ -126,41 +142,54 @@ export default function BookingPage() {
     }
 
     try {
+      // Do not use merge here. A fixed document ID plus create-only public
+      // Firestore rules makes this reservation an atomic, one-winner write.
       await setDoc(doc(db, "bookings", booking.id), {
         ...booking,
         serverCreatedAt: serverTimestamp(),
       });
 
-      const emailResponse = await fetch("/api/booking-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: booking.name,
-          phone: booking.phone,
-          email: booking.email,
-          address: booking.address,
-          city: booking.city,
-          service: booking.serviceName,
-          date: booking.date,
-          time: booking.time,
-          notes: booking.notes,
-        }),
-      });
+      // The booking is already safely reserved. Email failure must not create
+      // a duplicate retry, so log it while still showing booking confirmation.
+      try {
+        const emailResponse = await fetch("/api/booking-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: booking.name,
+            phone: booking.phone,
+            email: booking.email,
+            address: booking.address,
+            city: booking.city,
+            service: booking.serviceName,
+            date: booking.date,
+            time: booking.time,
+            notes: booking.notes,
+          }),
+        });
 
-      if (!emailResponse.ok) {
-        const emailError = await emailResponse.text();
-        console.error("Notification email failed:", emailError);
+        if (!emailResponse.ok) {
+          const emailError = await emailResponse.text();
+          console.error("Booking saved, but notification email failed:", emailError);
+        }
+      } catch (emailError) {
+        console.error("Booking saved, but notification email failed:", emailError);
       }
 
       formElement.reset();
       setSubmitted(booking);
     } catch (bookingError) {
-      console.error(bookingError);
-      setError(
-        "That time may already be booked, or the appointment could not be saved."
-      );
+      console.error("Unable to reserve appointment:", bookingError);
+
+      if (isSlotConflict(bookingError)) {
+        setError(
+          "Sorry, that appointment time was just booked. Please choose another date or time."
+        );
+      } else {
+        setError(
+          "The appointment could not be saved. Please try again or call Russell at 985-295-1163."
+        );
+      }
     } finally {
       setSaving(false);
     }
@@ -171,9 +200,7 @@ export default function BookingPage() {
       <main className="booking-shell">
         <section className="confirmation-card">
           <h1>Thank you, {submitted.name}!</h1>
-
           <p>Your appointment request has been received.</p>
-
           <p>
             Russell will contact you to confirm your appointment for{" "}
             <strong>
@@ -181,7 +208,6 @@ export default function BookingPage() {
             </strong>
             .
           </p>
-
           <p>
             <strong>Date:</strong> {submitted.date}
             <br />
@@ -232,7 +258,6 @@ export default function BookingPage() {
         <section className="form-card">
           <div className="form-section-heading">
             <span>1</span>
-
             <div>
               <h2>Choose a service</h2>
               <p>Select the equipment you need sharpened.</p>
@@ -248,12 +273,10 @@ export default function BookingPage() {
                   name="service"
                   value={service.id}
                 />
-
                 <span>
                   <strong>{service.name}</strong>
                   <small>{service.detail}</small>
                 </span>
-
                 <b>${service.price}</b>
               </label>
             ))}
@@ -263,22 +286,22 @@ export default function BookingPage() {
         <section className="form-card">
           <div className="form-section-heading">
             <span>2</span>
-
             <div>
               <h2>Select a date and time</h2>
-              <p>Appointments are available Friday and Saturday.</p>
+              <p>
+                Appointments are available Friday and Saturday. If a time was
+                just reserved, you will be asked to select another slot.
+              </p>
             </div>
           </div>
 
           <div className="field-grid">
             <label>
               <span>Appointment date</span>
-
               <select name="date" required defaultValue="">
                 <option value="" disabled>
                   Choose a date
                 </option>
-
                 {dates.map((date) => (
                   <option key={dateValue(date)} value={dateValue(date)}>
                     {formatDate(date)}
@@ -289,12 +312,10 @@ export default function BookingPage() {
 
             <label>
               <span>Appointment time</span>
-
               <select name="time" required defaultValue="">
                 <option value="" disabled>
                   Choose a time
                 </option>
-
                 {times.map((time) => (
                   <option key={time} value={time}>
                     {time}
@@ -308,7 +329,6 @@ export default function BookingPage() {
         <section className="form-card">
           <div className="form-section-heading">
             <span>3</span>
-
             <div>
               <h2>Your information</h2>
               <p>Russell will use this information to confirm your visit.</p>
@@ -318,27 +338,25 @@ export default function BookingPage() {
           <div className="field-grid">
             <label>
               <span>Name *</span>
-              <input name="name" required />
+              <input name="name" autoComplete="name" required />
             </label>
 
             <label>
               <span>Phone *</span>
-              <input name="phone" type="tel" required />
+              <input name="phone" type="tel" autoComplete="tel" required />
             </label>
 
             <label>
               <span>Email</span>
-              <input name="email" type="email" />
+              <input name="email" type="email" autoComplete="email" />
             </label>
 
             <label>
               <span>City *</span>
-
               <select name="city" required defaultValue="">
                 <option value="" disabled>
                   Choose your city
                 </option>
-
                 {serviceAreas.map((area) => (
                   <option key={area} value={area}>
                     {area}
@@ -349,12 +367,15 @@ export default function BookingPage() {
 
             <label className="full-field">
               <span>Service address *</span>
-              <input name="address" required />
+              <input
+                name="address"
+                autoComplete="street-address"
+                required
+              />
             </label>
 
             <label className="full-field">
               <span>Notes</span>
-
               <textarea
                 name="notes"
                 rows={4}
@@ -369,7 +390,7 @@ export default function BookingPage() {
             {error}
           </p>
         )}
-
+a
         <section className="submit-panel">
           <div>
             <strong>No payment is due online.</strong>
@@ -377,7 +398,7 @@ export default function BookingPage() {
           </div>
 
           <button className="button primary" type="submit" disabled={saving}>
-            {saving ? "Saving appointment..." : "Request appointment"}
+            {saving ? "Reserving appointment..." : "Request appointment"}
           </button>
         </section>
       </form>

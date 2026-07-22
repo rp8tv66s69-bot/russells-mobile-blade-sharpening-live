@@ -7,12 +7,20 @@ import { FirebaseError } from "firebase/app";
 import { db } from "@/lib/firebase";
 import type { BlockedSlot, Booking } from "@/lib/types";
 
-const services = [
-  { id: "push-mower", name: "Push Mower", detail: "1 blade", price: 20 },
-  { id: "riding-mower", name: "Riding Mower", detail: "2 blades", price: 40 },
-  { id: "zero-turn", name: "Zero Turn", detail: "3 blades", price: 60 },
-  { id: "bush-hog", name: "Bush Hog", detail: "2 blades", price: 80 },
+const mowerTypes = [
+  { id: "push-mower", name: "Push Mower" },
+  { id: "riding-mower", name: "Riding Mower" },
+  { id: "zero-turn", name: "Zero Turn" },
+  { id: "bush-hog", name: "Bush Hog" },
 ];
+
+const bladeQuantities = [1, 2, 3, 4, 5, 6];
+
+function pricePerBlade(jobType: string, mowerType: string) {
+  if (!jobType) return 0;
+  if (jobType === "blade-changing") return 10;
+  return mowerType === "bush-hog" ? 40 : 20;
+}
 
 const times = [
   "8:00 AM",
@@ -95,7 +103,11 @@ export default function BookingPage() {
   const [saving, setSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [jobType, setJobType] = useState("");
+  const [selectedMowerType, setSelectedMowerType] = useState("");
+  const [bladeCount, setBladeCount] = useState(0);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+  const currentPricePerBlade = pricePerBlade(jobType, selectedMowerType);
 
   useEffect(() => {
     return onSnapshot(
@@ -128,12 +140,26 @@ export default function BookingPage() {
 
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    const selectedService = services.find(
+    const selectedService = mowerTypes.find(
       (service) => service.id === String(form.get("service") || "")
     );
+    const selectedBladeCount = Number(form.get("bladeCount") || 0);
+    const selectedJobType = String(form.get("jobType") || "");
+
+    if (!['sharpening', 'blade-changing'].includes(selectedJobType)) {
+      setError("Please select a service.");
+      setSaving(false);
+      return;
+    }
 
     if (!selectedService) {
-      setError("Please select a sharpening service.");
+      setError("Please select a mower type.");
+      setSaving(false);
+      return;
+    }
+
+    if (!bladeQuantities.includes(selectedBladeCount)) {
+      setError("Please select the number of blades.");
       setSaving(false);
       return;
     }
@@ -150,8 +176,10 @@ export default function BookingPage() {
       city: String(form.get("city") || "").trim(),
       serviceId: selectedService.id,
       serviceName: selectedService.name,
-      serviceDetail: selectedService.detail,
-      price: selectedService.price,
+      serviceDetail: `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}`,
+      jobType: selectedJobType,
+      bladeCount: selectedBladeCount,
+      price: selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id),
       date,
       time,
       notes: String(form.get("notes") || "").trim(),
@@ -195,6 +223,8 @@ export default function BookingPage() {
             address: booking.address,
             city: booking.city,
             service: booking.serviceName,
+            serviceDetail: booking.serviceDetail,
+            price: booking.price,
             date: booking.date,
             time: booking.time,
             notes: booking.notes,
@@ -212,6 +242,9 @@ export default function BookingPage() {
       formElement.reset();
       setSelectedDate("");
       setSelectedTime("");
+      setJobType("");
+      setSelectedMowerType("");
+      setBladeCount(0);
       setSubmitted(booking);
     } catch (bookingError) {
       console.error("Unable to reserve appointment:", bookingError);
@@ -294,27 +327,62 @@ export default function BookingPage() {
           <div className="form-section-heading">
             <span>1</span>
             <div>
-              <h2>Choose a service</h2>
-              <p>Select the equipment you need sharpened.</p>
+              <h2>Choose service, mower type, and blade quantity</h2>
+              <p>Sharpening starts at $20 per blade. Blade changing only is $10 per blade.</p>
             </div>
           </div>
 
-          <div className="service-options">
-            {services.map((service) => (
-              <label className="service-option" key={service.id}>
-                <input
-                  required
-                  type="radio"
-                  name="service"
-                  value={service.id}
-                />
-                <span>
-                  <strong>{service.name}</strong>
-                  <small>{service.detail}</small>
-                </span>
-                <b>${service.price}</b>
-              </label>
-            ))}
+          <div className="field-grid">
+            <label>
+              <span>Service *</span>
+              <select
+                name="jobType"
+                required
+                value={jobType}
+                onChange={(event) => setJobType(event.target.value)}
+              >
+                <option value="" disabled>Choose a service</option>
+                <option value="sharpening">Blade sharpening</option>
+                <option value="blade-changing">Blade changing only</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Mower type *</span>
+              <select
+                name="service"
+                required
+                value={selectedMowerType}
+                onChange={(event) => setSelectedMowerType(event.target.value)}
+              >
+                <option value="" disabled>Choose mower type</option>
+                {mowerTypes.map((mower) => (
+                  <option key={mower.id} value={mower.id}>{mower.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span>Number of blades *</span>
+              <select
+                name="bladeCount"
+                required
+                value={bladeCount || ""}
+                onChange={(event) => setBladeCount(Number(event.target.value))}
+              >
+                <option value="" disabled>Choose blade quantity</option>
+                {bladeQuantities.map((quantity) => (
+                  <option key={quantity} value={quantity}>
+                    {quantity} {quantity === 1 ? "blade" : "blades"}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="price-calculation" aria-live="polite">
+            <span>{bladeCount ? `${bladeCount} × $${currentPricePerBlade} per blade` : jobType ? `$${currentPricePerBlade} per blade` : "Select a service to see pricing"}</span>
+            <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
           </div>
         </section>
 

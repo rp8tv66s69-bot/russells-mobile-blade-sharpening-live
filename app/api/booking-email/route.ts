@@ -8,6 +8,8 @@ type BookingNotification = {
   address?: string;
   city?: string;
   service?: string;
+  serviceDetail?: string;
+  price?: number;
   date?: string;
   time?: string;
   notes?: string;
@@ -26,7 +28,7 @@ async function sendOwnerText(booking: BookingNotification) {
 
   const body = [
     "New blade sharpening booking",
-    `${booking.name || "Customer"}: ${booking.service || "Service"}`,
+    `${booking.name || "Customer"}: ${booking.service || "Service"}${booking.serviceDetail ? ` (${booking.serviceDetail})` : ""}`,
     `${booking.date || "Date pending"} at ${booking.time || "Time pending"}`,
     `${booking.city || ""} — ${booking.phone || "No phone"}`,
   ]
@@ -86,7 +88,8 @@ export async function POST(req: Request) {
         <p><strong>Email:</strong> ${booking.email || "Not provided"}</p>
         <p><strong>Address:</strong> ${booking.address}</p>
         <p><strong>City:</strong> ${booking.city}</p>
-        <p><strong>Service:</strong> ${booking.service}</p>
+        <p><strong>Service:</strong> ${booking.service}${booking.serviceDetail ? ` (${booking.serviceDetail})` : ""}</p>
+        <p><strong>Total:</strong> $${booking.price || 0}</p>
         <p><strong>Date:</strong> ${booking.date}</p>
         <p><strong>Time:</strong> ${booking.time}</p>
         <p><strong>Notes:</strong> ${booking.notes || "None"}</p>

@@ -4,10 +4,10 @@ import SiteHeader from "@/components/SiteHeader";
 import BeforeAfterGallery from "@/components/BeforeAfterGallery";
 
 const services = [
-  ["Push Mower", "1 blade", "$20"],
-  ["Riding Mower", "2 blades", "$40"],
-  ["Zero Turn", "3 blades", "$60"],
-  ["Bush Hog", "2 blades", "$80"],
+  ["Push Mower", "$20/blade"],
+  ["Riding Mower", "$20/blade"],
+  ["Zero Turn", "$20/blade"],
+  ["Bush Hog", "$40/blade"],
 ];
 
 export default function HomePage() {
@@ -39,15 +39,24 @@ export default function HomePage() {
         <div className="section-heading">
           <p className="eyebrow">Veteran Owned · Straightforward pricing</p>
           <h2>Sharpening services</h2>
-          <p className="section-lead">Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
+          <p className="section-lead">Mower blades are <strong>$20 per blade</strong>, and Bush Hog blades are <strong>$40 per blade.</strong> Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
         </div>
         <div className="service-grid">
-          {services.map(([name, detail, price]) => (
+          {services.map(([name, price]) => (
             <article className="service-card" key={name}>
-              <div><h3>{name}</h3><p>{detail}</p></div><strong>{price}</strong>
+              <div><h3>{name}</h3><p>Choose your number of blades</p></div><strong>{price}</strong>
             </article>
           ))}
         </div>
+        <article className="blade-change-callout">
+          <div>
+            <p className="eyebrow">Additional service</p>
+            <h3>Blade changing only</h3>
+            <p>Already have replacement blades? Russell can remove your old blades and install the replacements.</p>
+          </div>
+          <strong>$10 per blade</strong>
+          <Link className="button orange" href="/book">Book blade changing</Link>
+        </article>
       </section>
 
       <section className="section band">

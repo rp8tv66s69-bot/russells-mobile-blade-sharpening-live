@@ -52,9 +52,9 @@ export default function HomePage() {
           <div>
             <p className="eyebrow">Additional service</p>
             <h3>Blade changing only</h3>
-            <p>Already have replacement blades? Russell can remove your old blades and install the replacements.</p>
+            <p>Already have replacement blades? Russell can remove your old blades and install the replacements. Bush Hog blade changes are $20 per blade.</p>
           </div>
-          <strong>$10 per blade</strong>
+          <strong>$10 mower · $20 Bush Hog</strong>
           <Link className="button orange" href="/book">Book blade changing</Link>
         </article>
       </section>

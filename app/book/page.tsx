@@ -18,7 +18,7 @@ const bladeQuantities = [1, 2, 3, 4, 5, 6];
 
 function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
-  if (jobType === "blade-changing") return 10;
+  if (jobType === "blade-changing") return mowerType === "bush-hog" ? 20 : 10;
   return mowerType === "bush-hog" ? 40 : 20;
 }
 
@@ -328,7 +328,7 @@ export default function BookingPage() {
             <span>1</span>
             <div>
               <h2>Choose service, mower type, and blade quantity</h2>
-              <p>Sharpening starts at $20 per blade. Blade changing only is $10 per blade.</p>
+              <p>Sharpening starts at $20 per blade. Blade changing is $10 per mower blade or $20 per Bush Hog blade.</p>
             </div>
           </div>
 

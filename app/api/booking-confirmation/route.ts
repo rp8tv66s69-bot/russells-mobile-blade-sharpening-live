@@ -1,0 +1,141 @@
+import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+const OWNER_EMAIL = "rtaylorusa@bellsouth.net";
+
+type ConfirmationRequest = {
+  name?: string;
+  email?: string;
+  serviceName?: string;
+  serviceDetail?: string;
+  price?: number;
+  date?: string;
+  time?: string;
+  address?: string;
+  city?: string;
+};
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+async function authenticatedOwner(request: Request) {
+  const authorization = request.headers.get("authorization") || "";
+  const token = authorization.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length)
+    : "";
+  const firebaseApiKey =
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    "AIzaSyAWAU1httOrLUZEpvG4fkcvJing-e_T_68";
+
+  if (!token) return false;
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseApiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken: token }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) return false;
+
+  const result = (await response.json()) as {
+    users?: Array<{ email?: string }>;
+  };
+
+  return result.users?.[0]?.email?.toLowerCase() === OWNER_EMAIL;
+}
+
+export async function POST(request: Request) {
+  try {
+    if (!(await authenticatedOwner(request))) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Email service is not configured." },
+        { status: 500 }
+      );
+    }
+
+    const booking = (await request.json()) as ConfirmationRequest;
+
+    if (
+      !booking.name ||
+      !booking.email ||
+      !booking.serviceName ||
+      !booking.date ||
+      !booking.time
+    ) {
+      return NextResponse.json(
+        { error: "Required appointment information is missing." },
+        { status: 400 }
+      );
+    }
+
+    const safe = {
+      name: escapeHtml(booking.name),
+      serviceName: escapeHtml(booking.serviceName),
+      serviceDetail: escapeHtml(booking.serviceDetail),
+      price: escapeHtml(booking.price),
+      date: escapeHtml(booking.date),
+      time: escapeHtml(booking.time),
+      address: escapeHtml(booking.address),
+      city: escapeHtml(booking.city),
+    };
+
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.emails.send({
+      from: "Russell's Mobile Blade Sharpening <bookings@russellsmobileblade.com>",
+      to: [booking.email],
+      replyTo: "Rtaylorusa@bellsouth.net",
+      subject: "Your blade sharpening appointment is confirmed",
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#101713;line-height:1.6">
+          <div style="background:#0b4d22;color:#fff;padding:24px;border-radius:14px 14px 0 0">
+            <p style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700">Veteran Owned</p>
+            <h1 style="margin:0;font-size:28px">Appointment confirmed</h1>
+          </div>
+          <div style="border:1px solid #d9ded8;border-top:0;padding:26px;border-radius:0 0 14px 14px">
+            <p>Hi ${safe.name},</p>
+            <p>Your appointment with <strong>Russell's Mobile Blade Sharpening</strong> is confirmed.</p>
+            <table style="width:100%;border-collapse:collapse;margin:22px 0">
+              <tr><td style="padding:9px 0;color:#667069">Service</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.serviceName}${safe.serviceDetail ? ` (${safe.serviceDetail})` : ""}</td></tr>
+              <tr><td style="padding:9px 0;color:#667069">Price</td><td style="padding:9px 0;text-align:right;font-weight:700">$${safe.price}</td></tr>
+              <tr><td style="padding:9px 0;color:#667069">Date</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.date}</td></tr>
+              <tr><td style="padding:9px 0;color:#667069">Time</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.time}</td></tr>
+              <tr><td style="padding:9px 0;color:#667069">Location</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.address}, ${safe.city}</td></tr>
+            </table>
+            <p>Please have your mower or blades accessible at the scheduled time.</p>
+            <p>Need to make a change? Call or text <a href="tel:+19852951163" style="color:#167331;font-weight:700">985-295-1163</a>.</p>
+            <p style="margin-bottom:0">Thank you,<br><strong>Russell</strong></p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Customer confirmation email failed:", error);
+      return NextResponse.json({ error }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error("Unable to send customer confirmation:", error);
+    return NextResponse.json(
+      { error: "Unable to send customer confirmation." },
+      { status: 500 }
+    );
+  }
+}

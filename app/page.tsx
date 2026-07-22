@@ -57,6 +57,10 @@ export default function HomePage() {
           <strong>$10 mower · $20 Bush Hog</strong>
           <Link className="button orange" href="/book">Book blade changing</Link>
         </article>
+        <p className="custom-service-caption home-custom-service-caption">
+          Need something other than blade services?{" "}
+          <a href="sms:+19852951163">Let me know.</a>
+        </p>
       </section>
 
       <section className="section band">

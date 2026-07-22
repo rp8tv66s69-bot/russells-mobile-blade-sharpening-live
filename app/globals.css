@@ -43,3 +43,4 @@
 /* Blade-changing service callout */
 .blade-change-callout{margin-top:24px;border:2px solid var(--orange);border-radius:20px;background:#fff8ef;padding:24px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:24px}.blade-change-callout h3{margin:4px 0 8px;font-size:26px}.blade-change-callout p{margin:0}.blade-change-callout>strong{color:var(--green);font-size:24px;white-space:nowrap}
 @media(max-width:800px){.blade-change-callout{grid-template-columns:1fr}.blade-change-callout .button{width:fit-content}}
+.custom-service-caption{margin:18px 0 0;text-align:center;color:var(--muted);font-weight:800}.custom-service-caption a{color:var(--green);text-decoration:underline;text-underline-offset:3px}.home-custom-service-caption{font-size:18px;margin-top:26px}

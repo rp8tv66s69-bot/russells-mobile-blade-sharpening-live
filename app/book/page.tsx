@@ -384,6 +384,10 @@ export default function BookingPage() {
             <span>{bladeCount ? `${bladeCount} × $${currentPricePerBlade} per blade` : jobType ? `$${currentPricePerBlade} per blade` : "Select a service to see pricing"}</span>
             <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
           </div>
+          <p className="custom-service-caption">
+            Need something other than blade services?{" "}
+            <a href="sms:+19852951163">Let me know.</a>
+          </p>
         </section>
 
         <section className="form-card">

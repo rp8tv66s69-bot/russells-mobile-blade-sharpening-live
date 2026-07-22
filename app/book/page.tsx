@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { collection, doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { db } from "@/lib/firebase";
-import type { Booking } from "@/lib/types";
+import type { BlockedSlot, Booking } from "@/lib/types";
 
 const services = [
   { id: "push-mower", name: "Push Mower", detail: "1 blade", price: 20 },
@@ -32,7 +32,9 @@ const serviceAreas = [
   "Tangipahoa Parish",
 ];
 
-function nextAvailableDates(count = 12) {
+// Keep the public calendar to the next four weekends so every confirmed
+// appointment is within the email provider's reminder scheduling window.
+function nextAvailableDates(count = 8) {
   const dates: Date[] = [];
   const cursor = new Date();
 
@@ -91,6 +93,33 @@ export default function BookingPage() {
   const [submitted, setSubmitted] = useState<Booking | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+
+  useEffect(() => {
+    return onSnapshot(
+      collection(db, "blockedSlots"),
+      (snapshot) => {
+        setBlockedSlots(
+          snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as BlockedSlot))
+        );
+      },
+      (availabilityError) => {
+        console.error("Unable to load blocked appointment times:", availabilityError);
+      }
+    );
+  }, []);
+
+  const blockedDates = useMemo(
+    () => new Set(blockedSlots.filter((slot) => slot.time === "All day").map((slot) => slot.date)),
+    [blockedSlots]
+  );
+
+  const blockedTimes = useMemo(
+    () => new Set(blockedSlots.filter((slot) => slot.date === selectedDate).map((slot) => slot.time)),
+    [blockedSlots, selectedDate]
+  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -181,6 +210,8 @@ export default function BookingPage() {
       }
 
       formElement.reset();
+      setSelectedDate("");
+      setSelectedTime("");
       setSubmitted(booking);
     } catch (bookingError) {
       console.error("Unable to reserve appointment:", bookingError);
@@ -302,13 +333,25 @@ export default function BookingPage() {
           <div className="field-grid">
             <label>
               <span>Appointment date</span>
-              <select name="date" required defaultValue="">
+              <select
+                name="date"
+                required
+                value={selectedDate}
+                onChange={(event) => {
+                  setSelectedDate(event.target.value);
+                  setSelectedTime("");
+                }}
+              >
                 <option value="" disabled>
                   Choose a date
                 </option>
                 {dates.map((date) => (
-                  <option key={dateValue(date)} value={dateValue(date)}>
-                    {formatDate(date)}
+                  <option
+                    key={dateValue(date)}
+                    value={dateValue(date)}
+                    disabled={blockedDates.has(dateValue(date))}
+                  >
+                    {formatDate(date)}{blockedDates.has(dateValue(date)) ? " (Unavailable)" : ""}
                   </option>
                 ))}
               </select>
@@ -316,13 +359,19 @@ export default function BookingPage() {
 
             <label>
               <span>Appointment time</span>
-              <select name="time" required defaultValue="">
+              <select
+                name="time"
+                required
+                value={selectedTime}
+                disabled={!selectedDate}
+                onChange={(event) => setSelectedTime(event.target.value)}
+              >
                 <option value="" disabled>
                   Choose a time
                 </option>
                 {times.map((time) => (
-                  <option key={time} value={time}>
-                    {time}
+                  <option key={time} value={time} disabled={blockedTimes.has(time)}>
+                    {time}{blockedTimes.has(time) ? " (Unavailable)" : ""}
                   </option>
                 ))}
               </select>
@@ -394,7 +443,6 @@ export default function BookingPage() {
             {error}
           </p>
         )}
-a
         <section className="submit-panel">
           <div>
             <strong>No payment is due online.</strong>

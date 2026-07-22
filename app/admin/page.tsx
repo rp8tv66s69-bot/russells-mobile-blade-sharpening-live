@@ -2,18 +2,25 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import type { Booking, BookingStatus, PaymentStatus } from "@/lib/types";
+import type { BlockedSlot, Booking, BookingStatus, PaymentStatus } from "@/lib/types";
 
 const statusOptions: BookingStatus[] = ["Pending", "Confirmed", "Completed", "Cancelled"];
 const paymentMethods = ["", "Cash", "Cash App", "Venmo"] as const;
+const appointmentTimes = ["All day", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"];
 const filterOptions = ["Today", "Upcoming", "Unpaid", "Completed", "Customers", "All"] as const;
 type Filter = (typeof filterOptions)[number];
 
 function localDateValue(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function blockedSlotId(date: string, time: string) {
+  return time === "All day"
+    ? `${date}_all`
+    : `${date}_${time.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
 }
 
 function formatDate(value: string) {
@@ -47,6 +54,11 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [dataError, setDataError] = useState("");
   const [sendingConfirmation, setSendingConfirmation] = useState<string | null>(null);
+  const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+  const [blockDate, setBlockDate] = useState("");
+  const [blockTime, setBlockTime] = useState("All day");
+  const [blockReason, setBlockReason] = useState("");
+  const [savingBlock, setSavingBlock] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (current) => {
     setUser(current);
@@ -66,6 +78,17 @@ export default function AdminPage() {
         console.error(error);
         setDataError("Appointments could not be loaded. Check your Firestore rules and internet connection.");
       },
+    );
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    return onSnapshot(
+      query(collection(db, "blockedSlots"), orderBy("date", "asc")),
+      (snapshot) => setBlockedSlots(
+        snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as BlockedSlot))
+      ),
+      (error) => console.error("Blocked times could not be loaded:", error)
     );
   }, [user]);
 
@@ -138,7 +161,12 @@ export default function AdminPage() {
         return false;
       }
 
-      window.alert(`Confirmation email sent to ${booking.email}.`);
+      const result = await response.json();
+      window.alert(
+        result.reminderScheduled
+          ? `Confirmation sent to ${booking.email}. A 24-hour reminder is also scheduled.`
+          : `Confirmation sent to ${booking.email}. ${result.reminderReason || "No reminder was scheduled."}`
+      );
       return true;
     } catch (error) {
       console.error(error);
@@ -175,6 +203,36 @@ export default function AdminPage() {
     }
   }
 
+  async function addBlockedSlot(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!blockDate) return;
+    setSavingBlock(true);
+    const id = blockedSlotId(blockDate, blockTime);
+    try {
+      await setDoc(doc(db, "blockedSlots", id), {
+        date: blockDate,
+        time: blockTime,
+        reason: blockReason.trim(),
+        createdAt: new Date().toISOString(),
+      });
+      setBlockReason("");
+    } catch (error) {
+      console.error(error);
+      window.alert("That blocked time could not be saved.");
+    } finally {
+      setSavingBlock(false);
+    }
+  }
+
+  async function removeBlockedSlot(id: string) {
+    try {
+      await deleteDoc(doc(db, "blockedSlots", id));
+    } catch (error) {
+      console.error(error);
+      window.alert("That blocked time could not be reopened.");
+    }
+  }
+
   if (authLoading || !user) return <main className="admin-shell"><p>Checking owner access...</p></main>;
 
   return (
@@ -205,6 +263,26 @@ export default function AdminPage() {
           <p className="muted">Open today&apos;s appointments as a multi-stop route in Google Maps.</p>
         </div>
         <a className={`button primary ${todayBookings.length ? "" : "disabled-link"}`} target="_blank" rel="noreferrer" href={routeUrl(todayBookings)}>Open today&apos;s route</a>
+      </section>
+
+      <section className="availability-panel">
+        <div className="availability-heading">
+          <div>
+            <p className="eyebrow">Schedule controls</p>
+            <h2>Block unavailable dates or times</h2>
+            <p className="muted">Customers will see these openings as unavailable on the booking page.</p>
+          </div>
+        </div>
+        <form className="availability-form" onSubmit={addBlockedSlot}>
+          <label>Date<input type="date" min={today} required value={blockDate} onChange={(event) => setBlockDate(event.target.value)} /></label>
+          <label>Time<select value={blockTime} onChange={(event) => setBlockTime(event.target.value)}>{appointmentTimes.map((time) => <option key={time}>{time}</option>)}</select></label>
+          <label>Reason (optional)<input placeholder="Vacation, weather, personal" value={blockReason} onChange={(event) => setBlockReason(event.target.value)} /></label>
+          <button className="button dark" disabled={savingBlock}>{savingBlock ? "Blocking..." : "Block time"}</button>
+        </form>
+        <div className="blocked-slot-list">
+          {blockedSlots.filter((slot) => slot.date >= today).length === 0 && <p className="muted">No future dates or times are blocked.</p>}
+          {blockedSlots.filter((slot) => slot.date >= today).map((slot) => <div key={slot.id}><span><strong>{formatDate(slot.date)} · {slot.time}</strong>{slot.reason && <small>{slot.reason}</small>}</span><button className="button secondary small" type="button" onClick={() => removeBlockedSlot(slot.id)}>Reopen</button></div>)}
+        </div>
       </section>
 
       {dataError && <p className="form-error" role="alert">{dataError}</p>}

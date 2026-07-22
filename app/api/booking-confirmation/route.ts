@@ -25,6 +25,27 @@ function escapeHtml(value: unknown) {
     .replaceAll("'", "&#039;");
 }
 
+function appointmentUtc(date: string, time: string) {
+  const match = time.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/i);
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (match[3].toUpperCase() === "PM" && hour !== 12) hour += 12;
+  if (match[3].toUpperCase() === "AM" && hour === 12) hour = 0;
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return null;
+
+  const approximate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+  const zoneName = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    timeZoneName: "longOffset",
+  }).formatToParts(approximate).find((part) => part.type === "timeZoneName")?.value;
+  const offsetMatch = zoneName?.match(/GMT([+-])(\d{2}):(\d{2})/);
+  if (!offsetMatch) return null;
+  const offsetMinutes = (Number(offsetMatch[2]) * 60 + Number(offsetMatch[3])) * (offsetMatch[1] === "+" ? 1 : -1);
+  return new Date(approximate.getTime() - offsetMinutes * 60_000);
+}
+
 async function ownerCanReadBooking(request: Request, bookingId: string) {
   const authorization = request.headers.get("authorization") || "";
   const token = authorization.startsWith("Bearer ")
@@ -122,7 +143,53 @@ export async function POST(request: Request) {
       return NextResponse.json({ error }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, data });
+    let reminderScheduled = false;
+    let reminderReason = "Appointment is too soon or too far away to schedule automatically.";
+    const appointment = appointmentUtc(booking.date, booking.time);
+    const reminderAt = appointment
+      ? new Date(appointment.getTime() - 24 * 60 * 60 * 1000)
+      : null;
+    const earliest = Date.now() + 5 * 60 * 1000;
+    const latest = Date.now() + 29 * 24 * 60 * 60 * 1000;
+
+    if (reminderAt && reminderAt.getTime() > earliest && reminderAt.getTime() < latest) {
+      const reminder = await resend.emails.send(
+        {
+          from: "Russell's Mobile Blade Sharpening <bookings@russellsmobileblade.com>",
+          to: [booking.email],
+          replyTo: "Rtaylorusa@bellsouth.net",
+          subject: "Reminder: your blade sharpening appointment is tomorrow",
+          scheduledAt: reminderAt.toISOString(),
+          html: `
+            <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#101713;line-height:1.6">
+              <div style="background:#0b4d22;color:#fff;padding:24px;border-radius:14px 14px 0 0">
+                <p style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700">Veteran Owned</p>
+                <h1 style="margin:0;font-size:28px">Appointment reminder</h1>
+              </div>
+              <div style="border:1px solid #d9ded8;border-top:0;padding:26px;border-radius:0 0 14px 14px">
+                <p>Hi ${safe.name},</p>
+                <p>This is a reminder that your blade sharpening appointment is tomorrow.</p>
+                <p><strong>${safe.serviceName}</strong><br>${safe.date} at ${safe.time}<br>${safe.address}, ${safe.city}</p>
+                <p>Please have your mower or blades accessible at the scheduled time.</p>
+                <p>Need to make a change? Call or text <a href="tel:+19852951163" style="color:#167331;font-weight:700">985-295-1163</a>.</p>
+                <p style="margin-bottom:0">Thank you,<br><strong>Russell</strong></p>
+              </div>
+            </div>
+          `,
+        },
+        { idempotencyKey: `booking-reminder-${booking.id}-${booking.date}-${booking.time}`.replace(/[^a-zA-Z0-9_-]/g, "-") }
+      );
+
+      if (reminder.error) {
+        console.error("Appointment reminder could not be scheduled:", reminder.error);
+        reminderReason = "The confirmation was sent, but the reminder could not be scheduled.";
+      } else {
+        reminderScheduled = true;
+        reminderReason = `Reminder scheduled for ${reminderAt.toISOString()}.`;
+      }
+    }
+
+    return NextResponse.json({ success: true, data, reminderScheduled, reminderReason });
   } catch (error) {
     console.error("Unable to send customer confirmation:", error);
     return NextResponse.json(

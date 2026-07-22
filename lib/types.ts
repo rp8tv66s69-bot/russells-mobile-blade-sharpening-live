@@ -20,3 +20,11 @@ export type Booking = {
   paymentMethod: "" | "Cash" | "Cash App" | "Venmo";
   createdAt: string;
 };
+
+export type BlockedSlot = {
+  id: string;
+  date: string;
+  time: string;
+  reason: string;
+  createdAt: string;
+};

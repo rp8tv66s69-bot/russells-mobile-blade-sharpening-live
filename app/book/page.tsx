@@ -328,7 +328,7 @@ export default function BookingPage() {
             <span>1</span>
             <div>
               <h2>Choose service, mower type, and blade quantity</h2>
-              <p>Sharpening starts at $20 per blade. Blade changing is $10 per mower blade or $20 per Bush Hog blade. Customers must supply all replacement blades.</p>
+              <p>Sharpening starts at $20 per blade. Blade changing is $10 per mower blade or $20 per Bush Hog blade. <strong className="customer-supplied-warning">Customers must supply all replacement blades.</strong></p>
             </div>
           </div>
 

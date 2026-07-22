@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     const { data, error } = await resend.emails.send({
       from: "Russell's Mobile Blade Sharpening <bookings@russellsmobileblade.com>",
       to: [booking.email],
-      replyTo: "Rtaylorusa@bellsouth.net",
+      replyTo: "russellsmobileblade@gmail.com",
       subject: "Your blade sharpening appointment is confirmed",
       html: `
         <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#101713;line-height:1.6">
@@ -157,7 +157,7 @@ export async function POST(request: Request) {
         {
           from: "Russell's Mobile Blade Sharpening <bookings@russellsmobileblade.com>",
           to: [booking.email],
-          replyTo: "Rtaylorusa@bellsouth.net",
+          replyTo: "russellsmobileblade@gmail.com",
           subject: "Reminder: your blade sharpening appointment is tomorrow",
           scheduledAt: reminderAt.toISOString(),
           html: `

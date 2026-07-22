@@ -11,6 +11,8 @@ export type Booking = {
   serviceId: string;
   serviceName: string;
   serviceDetail: string;
+  jobType?: string;
+  bladeCount?: number;
   price: number;
   date: string;
   time: string;
@@ -26,5 +28,14 @@ export type BlockedSlot = {
   date: string;
   time: string;
   reason: string;
+  createdAt: string;
+  group?: "all-day";
+};
+
+export type GalleryPhoto = {
+  id: string;
+  beforeImage: string;
+  afterImage: string;
+  caption: string;
   createdAt: string;
 };

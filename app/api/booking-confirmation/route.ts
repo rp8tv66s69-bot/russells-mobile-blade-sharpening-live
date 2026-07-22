@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const OWNER_EMAIL = "rtaylorusa@bellsouth.net";
+// Firebase web API keys identify the project and are safe to include in web
+// application source. Keep this synchronized with lib/firebase.ts.
+const FIREBASE_WEB_API_KEY = "AIzaSyAWAU1httOrLUZEpvG4fkcvJing-e_T_68";
 
 type ConfirmationRequest = {
   name?: string;
@@ -29,14 +32,10 @@ async function authenticatedOwner(request: Request) {
   const token = authorization.startsWith("Bearer ")
     ? authorization.slice("Bearer ".length)
     : "";
-  const firebaseApiKey =
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    "AIzaSyAWAU1httOrLUZEpvG4fkcvJing-e_T_68";
-
   if (!token) return false;
 
   const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseApiKey}`,
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_WEB_API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

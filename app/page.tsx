@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
+import BeforeAfterGallery from "@/components/BeforeAfterGallery";
 
 const services = [
   ["Push Mower", "1 blade", "$20"],
@@ -56,51 +57,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section page-width" id="gallery">
-        <div className="section-heading gallery-heading">
-          <div>
-            <p className="eyebrow">See the difference</p>
-            <h2>Before &amp; after sharpening</h2>
-          </div>
-          <p className="section-lead">
-            A clean, balanced edge helps your mower cut grass instead of
-            tearing it. Real customer transformations will be featured here.
-          </p>
-        </div>
-
-        <div className="comparison-card">
-          <figure className="comparison-photo">
-            <div className="photo-label before-label">Before</div>
-            <Image
-              src="/gallery-before-placeholder.svg"
-              alt="Placeholder for a dull mower blade before sharpening"
-              width={720}
-              height={480}
-              className="gallery-image"
-            />
-            <figcaption>Dull, rounded cutting edge</figcaption>
-          </figure>
-
-          <div className="comparison-arrow" aria-hidden="true">→</div>
-
-          <figure className="comparison-photo">
-            <div className="photo-label after-label">After</div>
-            <Image
-              src="/gallery-after-placeholder.svg"
-              alt="Placeholder for a mower blade after professional sharpening"
-              width={720}
-              height={480}
-              className="gallery-image"
-            />
-            <figcaption>Sharp, clean and ready for a better cut</figcaption>
-          </figure>
-        </div>
-
-        <div className="gallery-promise">
-          <strong>Every service includes precision sharpening.</strong>
-          <span>Your blades are returned ready for a cleaner, healthier-looking lawn.</span>
-        </div>
-      </section>
+      <BeforeAfterGallery />
 
       <section className="section page-width contact-card">
         <div><p className="eyebrow">Ready for a cleaner cut?</p><h2>Schedule your blades today.</h2><p>Your blades will be sharpened on site and ready for healthier, cleaner-looking grass.</p></div>

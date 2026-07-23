@@ -9,6 +9,12 @@ type BookingNotification = {
   city?: string;
   service?: string;
   serviceDetail?: string;
+  equipmentMake?: string;
+  equipmentModel?: string;
+  engineMake?: string;
+  engineModel?: string;
+  serialNumber?: string;
+  filterType?: string;
   price?: number;
   date?: string;
   time?: string;
@@ -80,7 +86,7 @@ export async function POST(req: Request) {
     const { data, error } = await resend.emails.send({
       from: "Russell's Mobile Blade Sharpening <bookings@russellsmobileblade.com>",
       to: ["russellsmobileblade@gmail.com"],
-      subject: `New Blade Sharpening Booking - ${booking.name}`,
+      subject: `New Service Booking - ${booking.name}`,
       html: `
         <h2>New Booking Received</h2>
         <p><strong>Name:</strong> ${booking.name}</p>
@@ -89,6 +95,10 @@ export async function POST(req: Request) {
         <p><strong>Address:</strong> ${booking.address}</p>
         <p><strong>City:</strong> ${booking.city}</p>
         <p><strong>Service:</strong> ${booking.service}${booking.serviceDetail ? ` (${booking.serviceDetail})` : ""}</p>
+        ${booking.equipmentMake ? `<p><strong>Equipment:</strong> ${booking.equipmentMake} ${booking.equipmentModel || ""}</p>` : ""}
+        ${booking.engineMake ? `<p><strong>Engine:</strong> ${booking.engineMake} ${booking.engineModel || ""}</p>` : ""}
+        ${booking.serialNumber ? `<p><strong>Serial number:</strong> ${booking.serialNumber}</p>` : ""}
+        ${booking.filterType ? `<p><strong>Filter type:</strong> ${booking.filterType}</p>` : ""}
         <p><strong>Total:</strong> $${booking.price || 0}</p>
         <p><strong>Date:</strong> ${booking.date}</p>
         <p><strong>Time:</strong> ${booking.time}</p>

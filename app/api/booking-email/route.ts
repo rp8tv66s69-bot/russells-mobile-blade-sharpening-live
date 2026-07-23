@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         ${booking.engineMake ? `<p><strong>Engine:</strong> ${booking.engineMake} ${booking.engineModel || ""}</p>` : ""}
         ${booking.serialNumber ? `<p><strong>Serial number:</strong> ${booking.serialNumber}</p>` : ""}
         ${booking.filterType ? `<p><strong>Filter type:</strong> ${booking.filterType}</p>` : ""}
-        ${booking.bladeSupplier ? `<p><strong>Replacement blades:</strong> ${booking.bladeSupplier}</p>` : ""}
+        ${booking.bladeSupplier ? `<p><strong>Replacement blades:</strong> ${booking.bladeSupplier}${booking.bladeSupplier === "Russell supplied" ? " — parts cost plus 25% sourcing and handling ($10 minimum)" : ""}</p>` : ""}
         <p><strong>Total:</strong> $${booking.price || 0}</p>
         <p><strong>Date:</strong> ${booking.date}</p>
         <p><strong>Time:</strong> ${booking.time}</p>

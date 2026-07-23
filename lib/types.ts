@@ -13,6 +13,11 @@ export type Booking = {
   serviceDetail: string;
   jobType?: string;
   bladeCount?: number;
+  equipmentMake?: string;
+  equipmentModel?: string;
+  engineMake?: string;
+  engineModel?: string;
+  serialNumber?: string;
   price: number;
   date: string;
   time: string;

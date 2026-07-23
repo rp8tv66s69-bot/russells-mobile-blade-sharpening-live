@@ -23,6 +23,43 @@ const maintenancePrices: Record<string, number> = {
   "zero-turn": 95,
   tractor: 125,
 };
+const otherOption = "Other / not listed";
+const equipmentMakes = ["Ariens", "Bad Boy", "Bobcat", "Bush Hog", "Craftsman", "Cub Cadet", "Exmark", "Ferris", "Gravely", "Honda", "Husqvarna", "Hustler", "John Deere", "Kioti", "Kubota", "Mahindra", "Massey Ferguson", "MTD", "Murray", "New Holland", "Poulan Pro", "Ryobi", "Scag", "Snapper", "Spartan", "Toro", "Troy-Bilt", otherOption];
+const engineMakes = ["Briggs & Stratton", "Honda", "Kawasaki", "Kohler", "Kubota", "Vanguard", "Yamaha", otherOption];
+const equipmentModels: Record<string, string[]> = {
+  Ariens: ["IKON", "EDGE", "APEX", "RAZOR", "CLASSIC"],
+  "Bad Boy": ["MZ Rambler", "MZ Magnum", "ZT Elite", "Avenger", "Rebel"],
+  "Bush Hog": ["BH100", "BH200", "BH300", "SQ Series", "Razorback Series"],
+  Craftsman: ["M100", "M110", "M210", "T100", "T110", "T210", "Z5200"],
+  "Cub Cadet": ["SC Series", "XT1", "XT2", "Ultima ZT1", "Ultima ZT2"],
+  Exmark: ["Quest", "Radius", "Lazer Z", "Navigator"],
+  Ferris: ["IS 600", "IS 700", "ISX 800", "ISX 2200", "F Series"],
+  Gravely: ["ZT X", "ZT XL", "Pro-Turn Z", "Pro-Turn ZX", "Pro-Turn 300"],
+  Honda: ["HRN216", "HRX217", "HRC216"],
+  Husqvarna: ["YTH Series", "TS Series", "Z200 Series", "Z400 Series", "Xcite"],
+  Hustler: ["Dash", "Raptor", "Raptor XD", "FasTrak", "Super Z"],
+  "John Deere": ["100 Series", "200 Series", "X300 Series", "X500 Series", "Z300 Series", "Z500 Series", "Z700 Series", "1 Series", "2 Series", "3 Series"],
+  Kioti: ["CS Series", "CK Series", "DK Series", "NX Series"],
+  Kubota: ["T Series", "GR Series", "Z100 Series", "Z200 Series", "Z400 Series", "BX Series", "B Series", "L Series"],
+  Mahindra: ["eMax Series", "Max Series", "1600 Series", "2600 Series"],
+  "Massey Ferguson": ["GC1700 Series", "1800E Series", "2800E Series"],
+  "New Holland": ["Workmaster Series", "Boomer Series", "PowerStar Series"],
+  Ryobi: ["40V HP", "80V HP", "RY48ZTR"],
+  Scag: ["Liberty Z", "Freedom Z", "Patriot", "Tiger Cat II", "Cheetah II"],
+  Snapper: ["SP Series", "Classic Rear Engine Rider", "360Z", "400Z"],
+  Spartan: ["RZ", "RT", "SRT", "KG"],
+  Toro: ["Recycler", "Super Recycler", "TimeMaster", "TimeCutter", "Titan", "Z Master"],
+  "Troy-Bilt": ["TB110", "TB130", "TB200", "Pony", "Bronco", "Mustang"],
+};
+const engineModels: Record<string, string[]> = {
+  "Briggs & Stratton": ["300E Series", "450E Series", "500E Series", "550E Series", "625EXi Series", "725EXi Series", "Professional Series", "Intek", "EXi Series"],
+  Honda: ["GCV160", "GCV170", "GCV190", "GCV200", "GX160", "GX200", "GX270", "GX390"],
+  Kawasaki: ["FR541V", "FR600V", "FR651V", "FR691V", "FR730V", "FS481V", "FS541V", "FS600V", "FS651V", "FS691V", "FS730V", "FX Series"],
+  Kohler: ["Courage", "Command PRO", "7000 Series", "Confidant", "KT610", "KT620", "KT725", "KT730", "KT735", "KT740", "KT745"],
+  Kubota: ["D722", "D902", "D1005", "D1105", "D1305", "V1505"],
+  Vanguard: ["Single-Cylinder", "V-Twin", "Small Block V-Twin", "Big Block V-Twin"],
+  Yamaha: ["MA190", "MX Series", "MXV Series"],
+};
 
 function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
@@ -116,14 +153,24 @@ export default function BookingPage() {
   const [bladeCount, setBladeCount] = useState(0);
   const [equipmentMake, setEquipmentMake] = useState("");
   const [equipmentModel, setEquipmentModel] = useState("");
+  const [customEquipmentMake, setCustomEquipmentMake] = useState("");
+  const [customEquipmentModel, setCustomEquipmentModel] = useState("");
   const [engineMake, setEngineMake] = useState("");
   const [engineModel, setEngineModel] = useState("");
+  const [customEngineMake, setCustomEngineMake] = useState("");
+  const [customEngineModel, setCustomEngineModel] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [filterType, setFilterType] = useState("");
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const isMaintenance = jobType === "maintenance";
   const currentPricePerBlade = pricePerBlade(jobType, selectedMowerType);
   const maintenanceLaborPrice = maintenancePrices[selectedMowerType] || 0;
+  const equipmentMakeValue = equipmentMake === otherOption ? customEquipmentMake.trim() : equipmentMake;
+  const equipmentModelValue = equipmentModel === otherOption ? customEquipmentModel.trim() : equipmentModel;
+  const engineMakeValue = engineMake === otherOption ? customEngineMake.trim() : engineMake;
+  const engineModelValue = engineModel === otherOption ? customEngineModel.trim() : engineModel;
+  const availableEquipmentModels = equipmentMake ? [...(equipmentModels[equipmentMake] || []), otherOption] : [];
+  const availableEngineModels = engineMake ? [...(engineModels[engineMake] || []), otherOption] : [];
 
   useEffect(() => {
     return onSnapshot(
@@ -300,8 +347,12 @@ export default function BookingPage() {
       setBladeCount(0);
       setEquipmentMake("");
       setEquipmentModel("");
+      setCustomEquipmentMake("");
+      setCustomEquipmentModel("");
       setEngineMake("");
       setEngineModel("");
+      setCustomEngineMake("");
+      setCustomEngineModel("");
       setSerialNumber("");
       setFilterType("");
       setSubmitted(booking);
@@ -432,20 +483,40 @@ export default function BookingPage() {
               <>
                 <label>
                   <span>Equipment make *</span>
-                  <input name="equipmentMake" required value={equipmentMake} onChange={(event) => setEquipmentMake(event.target.value)} placeholder="Example: John Deere" />
+                  <select required value={equipmentMake} onChange={(event) => { setEquipmentMake(event.target.value); setEquipmentModel(""); setCustomEquipmentMake(""); setCustomEquipmentModel(""); }}>
+                    <option value="" disabled>Select equipment make</option>
+                    {equipmentMakes.map((make) => <option key={make}>{make}</option>)}
+                  </select>
                 </label>
+                {equipmentMake === otherOption && <label><span>Other equipment make *</span><input required value={customEquipmentMake} onChange={(event) => setCustomEquipmentMake(event.target.value)} placeholder="Enter manufacturer" /></label>}
                 <label>
-                  <span>Equipment model *</span>
-                  <input name="equipmentModel" required value={equipmentModel} onChange={(event) => setEquipmentModel(event.target.value)} placeholder="Example: Z530M" />
+                  <span>Equipment model or series *</span>
+                  <select required disabled={!equipmentMake} value={equipmentModel} onChange={(event) => { setEquipmentModel(event.target.value); setCustomEquipmentModel(""); }}>
+                    <option value="" disabled>Select model or series</option>
+                    {availableEquipmentModels.map((model) => <option key={model}>{model}</option>)}
+                  </select>
                 </label>
+                {equipmentModel === otherOption && <label><span>Exact equipment model *</span><input required value={customEquipmentModel} onChange={(event) => setCustomEquipmentModel(event.target.value)} placeholder="Enter model number" /></label>}
                 <label>
                   <span>Engine manufacturer *</span>
-                  <input name="engineMake" required value={engineMake} onChange={(event) => setEngineMake(event.target.value)} placeholder="Example: Kawasaki" />
+                  <select required value={engineMake} onChange={(event) => { setEngineMake(event.target.value); setEngineModel(""); setCustomEngineMake(""); setCustomEngineModel(""); }}>
+                    <option value="" disabled>Select engine manufacturer</option>
+                    {engineMakes.map((make) => <option key={make}>{make}</option>)}
+                  </select>
                 </label>
+                {engineMake === otherOption && <label><span>Other engine manufacturer *</span><input required value={customEngineMake} onChange={(event) => setCustomEngineMake(event.target.value)} placeholder="Enter manufacturer" /></label>}
                 <label>
                   <span>Engine model *</span>
-                  <input name="engineModel" required value={engineModel} onChange={(event) => setEngineModel(event.target.value)} placeholder="Shown on the engine label" />
+                  <select required disabled={!engineMake} value={engineModel} onChange={(event) => { setEngineModel(event.target.value); setCustomEngineModel(""); }}>
+                    <option value="" disabled>Select engine model or series</option>
+                    {availableEngineModels.map((model) => <option key={model}>{model}</option>)}
+                  </select>
                 </label>
+                {engineModel === otherOption && <label><span>Exact engine model *</span><input required value={customEngineModel} onChange={(event) => setCustomEngineModel(event.target.value)} placeholder="Shown on the engine label" /></label>}
+                <input type="hidden" name="equipmentMake" value={equipmentMakeValue} />
+                <input type="hidden" name="equipmentModel" value={equipmentModelValue} />
+                <input type="hidden" name="engineMake" value={engineMakeValue} />
+                <input type="hidden" name="engineModel" value={engineModelValue} />
                 <label>
                   <span>Serial number (recommended)</span>
                   <input name="serialNumber" value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} placeholder="Equipment or engine serial number" />

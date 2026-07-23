@@ -160,6 +160,7 @@ export default function BookingPage() {
   const [engineModel, setEngineModel] = useState("");
   const [customEngineMake, setCustomEngineMake] = useState("");
   const [customEngineModel, setCustomEngineModel] = useState("");
+  const [engineHorsepower, setEngineHorsepower] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [filterType, setFilterType] = useState("");
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
@@ -214,6 +215,7 @@ export default function BookingPage() {
     const selectedModel = String(form.get("equipmentModel") || "").trim();
     const selectedEngineMake = String(form.get("engineMake") || "").trim();
     const selectedEngineModel = String(form.get("engineModel") || "").trim();
+    const selectedEngineHorsepower = String(form.get("engineHorsepower") || "").trim();
     const selectedSerialNumber = String(form.get("serialNumber") || "").trim();
     const selectedFilterType = String(form.get("filterType") || "");
 
@@ -283,6 +285,7 @@ export default function BookingPage() {
       equipmentModel: selectedJobType === "maintenance" ? selectedModel : "",
       engineMake: selectedJobType === "maintenance" ? selectedEngineMake : "",
       engineModel: selectedJobType === "maintenance" ? selectedEngineModel : "",
+      engineHorsepower: selectedJobType === "maintenance" ? selectedEngineHorsepower : "",
       serialNumber: selectedJobType === "maintenance" ? selectedSerialNumber : "",
       filterType: selectedJobType === "maintenance" ? selectedFilterType : "",
       price:
@@ -337,6 +340,7 @@ export default function BookingPage() {
             equipmentModel: booking.equipmentModel,
             engineMake: booking.engineMake,
             engineModel: booking.engineModel,
+            engineHorsepower: booking.engineHorsepower,
             serialNumber: booking.serialNumber,
             filterType: booking.filterType,
             bladeSupplier: booking.bladeSupplier,
@@ -370,6 +374,7 @@ export default function BookingPage() {
       setEngineModel("");
       setCustomEngineMake("");
       setCustomEngineModel("");
+      setEngineHorsepower("");
       setSerialNumber("");
       setFilterType("");
       setSubmitted(booking);
@@ -544,6 +549,10 @@ export default function BookingPage() {
                 <input type="hidden" name="equipmentModel" value={equipmentModelValue} />
                 <input type="hidden" name="engineMake" value={engineMakeValue} />
                 <input type="hidden" name="engineModel" value={engineModelValue} />
+                <label>
+                  <span>Engine horsepower (HP)</span>
+                  <input name="engineHorsepower" value={engineHorsepower} onChange={(event) => setEngineHorsepower(event.target.value)} placeholder="Example: 24 HP" />
+                </label>
                 <label>
                   <span>Serial number (recommended)</span>
                   <input name="serialNumber" value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} placeholder="Equipment or engine serial number" />

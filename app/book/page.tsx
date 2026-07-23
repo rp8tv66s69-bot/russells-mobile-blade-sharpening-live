@@ -560,7 +560,15 @@ export default function BookingPage() {
           {isMaintenance ? (
             <p className="custom-service-caption">Russell-supplied parts include a 25% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
           ) : jobType === "blade-changing" ? (
-            <p><strong>Replacement blades may be customer supplied or provided by Russell for an additional parts charge.</strong></p>
+            <div className="blade-changing-booking-summary">
+              <strong>Blade changing only</strong>
+              <span>Includes removal of the old blades and installation of replacement blades.</span>
+              <ul>
+                <li>Mower blades: $10 per blade</li>
+                <li>Bush Hog blades: $25 per blade</li>
+                <li>Supply compatible blades or have Russell provide them for an additional parts charge</li>
+              </ul>
+            </div>
           ) : null}
           <p className="custom-service-caption">
             Need something other than the services listed?{" "}

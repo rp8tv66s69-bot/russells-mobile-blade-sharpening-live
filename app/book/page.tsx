@@ -26,6 +26,7 @@ const maintenancePrices: Record<string, number> = {
 const otherOption = "Other / not listed";
 const equipmentMakes = ["Ariens", "Bad Boy", "Bobcat", "Bush Hog", "Craftsman", "Cub Cadet", "Dixie Chopper", "Exmark", "Ferris", "Gravely", "Honda", "Husqvarna", "Hustler", "John Deere", "Kioti", "Kubota", "Mahindra", "Massey Ferguson", "MTD", "Murray", "New Holland", "Poulan Pro", "Ryobi", "Scag", "Snapper", "Spartan", "Toro", "Troy-Bilt", otherOption];
 const engineMakes = ["Briggs & Stratton", "Generac", "Honda", "Kawasaki", "Kohler", "Kubota", "Vanguard", "Yamaha", otherOption];
+const engineHorsepowerOptions = ["Not sure", ...Array.from({ length: 38 }, (_, index) => `${index + 3} HP`)];
 const equipmentModels: Record<string, string[]> = {
   Ariens: ["IKON", "EDGE", "APEX", "RAZOR", "CLASSIC"],
   "Bad Boy": ["MZ Rambler", "MZ Magnum", "ZT Elite", "Avenger", "Rebel"],
@@ -552,7 +553,10 @@ export default function BookingPage() {
                 <input type="hidden" name="engineModel" value={engineModelValue} />
                 <label>
                   <span>Engine horsepower (HP)</span>
-                  <input name="engineHorsepower" value={engineHorsepower} onChange={(event) => setEngineHorsepower(event.target.value)} placeholder="Example: 24 HP" />
+                  <select name="engineHorsepower" value={engineHorsepower} onChange={(event) => setEngineHorsepower(event.target.value)}>
+                    <option value="">Select engine horsepower</option>
+                    {engineHorsepowerOptions.map((horsepower) => <option key={horsepower} value={horsepower}>{horsepower}</option>)}
+                  </select>
                 </label>
                 <label>
                   <span>Serial number (recommended)</span>

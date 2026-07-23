@@ -26,7 +26,7 @@ const maintenancePrices: Record<string, number> = {
 
 function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
-  if (jobType === "blade-changing") return mowerType === "bush-hog" ? 20 : 10;
+  if (jobType === "blade-changing") return mowerType === "bush-hog" ? 25 : 10;
   return mowerType === "bush-hog" ? 40 : 20;
 }
 
@@ -489,10 +489,10 @@ export default function BookingPage() {
           {isMaintenance ? (
             <p className="custom-service-caption">Russell-supplied parts include a 25% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
           ) : jobType === "blade-changing" ? (
-            <p><strong className="customer-supplied-warning">Customers must supply all replacement blades.</strong></p>
+            <p><strong>Replacement blades may be customer supplied or provided by Russell for an additional parts charge.</strong></p>
           ) : null}
           <p className="custom-service-caption">
-            Need something other than blade services?{" "}
+            Need something other than the services listed?{" "}
             <a href="sms:+19852951163">Let me know.</a>
           </p>
         </section>

@@ -69,7 +69,7 @@ export default function HomePage() {
             <p><strong>Replacement blade options</strong></p>
             <ul>
               <li>Supply your own compatible replacement blades</li>
-              <li>Russell can provide blades at the parts cost plus a 25% sourcing and handling charge ($10 minimum)</li>
+              <li>Russell can provide blades at the parts cost plus a 15% sourcing and handling charge ($10 minimum)</li>
             </ul>
           </div>
           <Link className="button orange" href="/book">Book blade changing</Link>
@@ -96,7 +96,7 @@ export default function HomePage() {
         </div>
         <div className="maintenance-notice">
           <strong>Appointments begin Friday, July 31, 2026.</strong>
-          <p>Russell-supplied parts include a 25% sourcing and handling charge, with a $10 minimum. Customers may provide compatible parts; customer-supplied parts are not covered by a parts warranty.</p>
+          <p>Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customers may provide compatible parts; customer-supplied parts are not covered by a parts warranty.</p>
           <p>Please provide the equipment make and model when booking. Additional repairs require customer approval.</p>
           <Link className="button orange" href="/book">Request Basic Maintenance</Link>
         </div>

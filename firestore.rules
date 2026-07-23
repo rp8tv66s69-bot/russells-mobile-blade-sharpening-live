@@ -24,10 +24,10 @@ service cloud.firestore {
             && request.resource.data.engineModel.size() > 0
             && request.resource.data.filterType in ["Standard residential", "Commercial canister", "Not sure"]
             && (
-              (request.resource.data.serviceId == "push-mower" && request.resource.data.price == 55)
-              || (request.resource.data.serviceId == "riding-mower" && request.resource.data.price == 85)
-              || (request.resource.data.serviceId == "zero-turn" && request.resource.data.price == 95)
-              || (request.resource.data.serviceId == "tractor" && request.resource.data.price == 125)
+              (request.resource.data.serviceId == "push-mower" && request.resource.data.price == 45)
+              || (request.resource.data.serviceId == "riding-mower" && request.resource.data.price == 75)
+              || (request.resource.data.serviceId == "zero-turn" && request.resource.data.price == 85)
+              || (request.resource.data.serviceId == "tractor" && request.resource.data.price == 115)
             ))
           ||
           (request.resource.data.jobType == "blade-changing"

@@ -9,6 +9,7 @@ type ConfirmationRequest = {
   email?: string;
   serviceName?: string;
   serviceDetail?: string;
+  engineHorsepower?: string;
   price?: number;
   date?: string;
   time?: string;
@@ -101,6 +102,7 @@ export async function POST(request: Request) {
       name: escapeHtml(booking.name),
       serviceName: escapeHtml(booking.serviceName),
       serviceDetail: escapeHtml(booking.serviceDetail),
+      engineHorsepower: escapeHtml(booking.engineHorsepower),
       price: escapeHtml(booking.price),
       date: escapeHtml(booking.date),
       time: escapeHtml(booking.time),
@@ -125,6 +127,7 @@ export async function POST(request: Request) {
             <p>Your appointment with <strong>Russell's Mobile Blade Sharpening</strong> is confirmed.</p>
             <table style="width:100%;border-collapse:collapse;margin:22px 0">
               <tr><td style="padding:9px 0;color:#667069">Service</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.serviceName}${safe.serviceDetail ? ` (${safe.serviceDetail})` : ""}</td></tr>
+              ${safe.engineHorsepower ? `<tr><td style="padding:9px 0;color:#667069">Engine horsepower</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.engineHorsepower}</td></tr>` : ""}
               <tr><td style="padding:9px 0;color:#667069">Price</td><td style="padding:9px 0;text-align:right;font-weight:700">$${safe.price}</td></tr>
               <tr><td style="padding:9px 0;color:#667069">Date</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.date}</td></tr>
               <tr><td style="padding:9px 0;color:#667069">Time</td><td style="padding:9px 0;text-align:right;font-weight:700">${safe.time}</td></tr>

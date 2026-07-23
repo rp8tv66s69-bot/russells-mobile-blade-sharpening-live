@@ -32,7 +32,7 @@ service cloud.firestore {
           ||
           (request.resource.data.jobType == "blade-changing"
             && request.resource.data.serviceId == "bush-hog"
-            && request.resource.data.price == request.resource.data.bladeCount * 20)
+            && request.resource.data.price == request.resource.data.bladeCount * 25)
           ||
           (request.resource.data.jobType == "blade-changing"
             && request.resource.data.serviceId in ["push-mower", "riding-mower", "zero-turn"]

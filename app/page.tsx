@@ -69,7 +69,7 @@ export default function HomePage() {
             <p><strong>Replacement blade options</strong></p>
             <ul>
               <li>Supply your own compatible replacement blades</li>
-              <li>Russell can provide blades for an additional parts charge</li>
+              <li>Russell can provide blades at the parts cost plus a 25% sourcing and handling charge ($10 minimum)</li>
             </ul>
           </div>
           <Link className="button orange" href="/book">Book blade changing</Link>

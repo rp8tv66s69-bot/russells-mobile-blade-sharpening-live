@@ -7,9 +7,28 @@ service cloud.firestore {
         && request.resource.data.status == "Pending"
         && request.resource.data.paymentStatus == "Unpaid"
         && request.resource.data.bladeCount is int
-        && request.resource.data.bladeCount >= 1
+        && request.resource.data.bladeCount >= 0
         && request.resource.data.bladeCount <= 6
         && (
+          (request.resource.data.jobType == "maintenance"
+            && request.resource.data.bladeCount == 0
+            && request.resource.data.serviceId in ["push-mower", "riding-mower", "zero-turn", "tractor"]
+            && request.resource.data.date >= "2026-07-31"
+            && request.resource.data.equipmentMake is string
+            && request.resource.data.equipmentMake.size() > 0
+            && request.resource.data.equipmentModel is string
+            && request.resource.data.equipmentModel.size() > 0
+            && request.resource.data.engineMake is string
+            && request.resource.data.engineMake.size() > 0
+            && request.resource.data.engineModel is string
+            && request.resource.data.engineModel.size() > 0
+            && (
+              (request.resource.data.serviceId == "push-mower" && request.resource.data.price == 55)
+              || (request.resource.data.serviceId == "riding-mower" && request.resource.data.price == 85)
+              || (request.resource.data.serviceId == "zero-turn" && request.resource.data.price == 95)
+              || (request.resource.data.serviceId == "tractor" && request.resource.data.price == 125)
+            ))
+          ||
           (request.resource.data.jobType == "blade-changing"
             && request.resource.data.serviceId == "bush-hog"
             && request.resource.data.price == request.resource.data.bladeCount * 20)

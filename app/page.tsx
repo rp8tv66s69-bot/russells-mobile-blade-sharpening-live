@@ -10,6 +10,13 @@ const services = [
   ["Bush Hog", "$40/blade"],
 ];
 
+const maintenanceServices = [
+  ["Push Mower", "$55 + parts"],
+  ["Riding Mower", "$85 + parts"],
+  ["Zero Turn", "$95 + parts"],
+  ["Tractor", "From $125 + parts"],
+];
+
 export default function HomePage() {
   return (
     <main>
@@ -61,6 +68,28 @@ export default function HomePage() {
           Need something other than blade services?{" "}
           <a href="sms:+19852951163">Let me know.</a>
         </p>
+      </section>
+
+      <section className="section page-width maintenance-section" id="maintenance">
+        <div className="section-heading">
+          <p className="eyebrow">New service · Available July 31, 2026</p>
+          <h2>Basic Maintenance</h2>
+          <p className="section-lead">Routine maintenance at your location includes an engine-oil change, applicable oil and air filters, and applicable spark plugs. Prices shown are for labor; oil, filters, spark plugs, and other parts are additional.</p>
+        </div>
+        <div className="service-grid">
+          {maintenanceServices.map(([name, price]) => (
+            <article className="service-card maintenance-card" key={name}>
+              <div><h3>{name}</h3><p>Oil, filters, and spark plug when applicable</p></div>
+              <strong>{price}</strong>
+            </article>
+          ))}
+        </div>
+        <div className="maintenance-notice">
+          <strong>Appointments begin Friday, July 31, 2026.</strong>
+          <p>Russell-supplied parts include a 25% sourcing and handling charge, with a $10 minimum. Customers may provide compatible parts; customer-supplied parts are not covered by a parts warranty.</p>
+          <p>Please provide the equipment make and model when booking. Additional repairs require customer approval.</p>
+          <Link className="button orange" href="/book">Request Basic Maintenance</Link>
+        </div>
       </section>
 
       <section className="section band">

@@ -12,6 +12,15 @@ const paymentMethods = ["", "Cash", "Cash App", "Venmo"] as const;
 const appointmentTimes = ["All day", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"];
 const filterOptions = ["Today", "Upcoming", "Unpaid", "Completed", "Customers", "All"] as const;
 type Filter = (typeof filterOptions)[number];
+type PartsLookupDetails = {
+  equipmentType?: string;
+  equipmentMake?: string;
+  equipmentModel?: string;
+  engineMake?: string;
+  engineModel?: string;
+  serialNumber?: string;
+  filterType?: string;
+};
 
 function servicePrice(jobType: string, serviceId: string, bladeCount: number) {
   if (jobType === "maintenance") {
@@ -53,20 +62,20 @@ function mapsSearchUrl(booking: Booking) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${booking.address}, ${booking.city}, LA`)}`;
 }
 
-function partsLookupUrl(booking: Booking, lookupType: "engine" | "equipment") {
+function partsLookupUrl(details: PartsLookupDetails, lookupType: "engine" | "equipment") {
   const identifiers = lookupType === "engine"
     ? [
-        booking.engineMake,
-        booking.engineModel,
-        booking.serialNumber,
-        booking.filterType,
+        details.engineMake,
+        details.engineModel,
+        details.serialNumber,
+        details.filterType,
         "genuine OEM manufacturer engine maintenance parts official parts catalog OEM part numbers oil capacity oil filter air filter fuel filter spark plug parts diagram -aftermarket",
       ]
     : [
-        booking.equipmentMake,
-        booking.equipmentModel,
-        booking.serialNumber,
-        booking.serviceName,
+        details.equipmentType,
+        details.equipmentMake,
+        details.equipmentModel,
+        details.serialNumber,
         "genuine OEM manufacturer equipment maintenance parts official parts catalog OEM part numbers manual parts diagram -aftermarket",
       ];
 
@@ -75,13 +84,14 @@ function partsLookupUrl(booking: Booking, lookupType: "engine" | "equipment") {
   )}`;
 }
 
-function amazonOemPartsUrl(booking: Booking) {
+function amazonOemPartsUrl(details: PartsLookupDetails) {
   const identifiers = [
-    booking.equipmentMake,
-    booking.equipmentModel,
-    booking.engineMake,
-    booking.engineModel,
-    booking.serialNumber,
+    details.equipmentType,
+    details.equipmentMake,
+    details.equipmentModel,
+    details.engineMake,
+    details.engineModel,
+    details.serialNumber,
     "genuine OEM",
   ].filter(Boolean).join(" ");
 
@@ -111,6 +121,26 @@ export default function AdminPage() {
   const [blockTime, setBlockTime] = useState("All day");
   const [blockReason, setBlockReason] = useState("");
   const [savingBlock, setSavingBlock] = useState(false);
+  const [partsEquipmentType, setPartsEquipmentType] = useState("Push mower");
+  const [partsEquipmentMake, setPartsEquipmentMake] = useState("");
+  const [partsEquipmentModel, setPartsEquipmentModel] = useState("");
+  const [partsEngineMake, setPartsEngineMake] = useState("");
+  const [partsEngineModel, setPartsEngineModel] = useState("");
+  const [partsSerialNumber, setPartsSerialNumber] = useState("");
+  const [partsFilterType, setPartsFilterType] = useState("Not sure");
+
+  const ownerPartsLookup: PartsLookupDetails = {
+    equipmentType: partsEquipmentType,
+    equipmentMake: partsEquipmentMake.trim(),
+    equipmentModel: partsEquipmentModel.trim(),
+    engineMake: partsEngineMake.trim(),
+    engineModel: partsEngineModel.trim(),
+    serialNumber: partsSerialNumber.trim(),
+    filterType: partsFilterType,
+  };
+  const canLookupEquipment = Boolean(partsEquipmentMake.trim() && partsEquipmentModel.trim());
+  const canLookupEngine = Boolean(partsEngineMake.trim() && partsEngineModel.trim());
+  const canSearchAmazon = canLookupEquipment || canLookupEngine;
 
   useEffect(() => onAuthStateChanged(auth, (current) => {
     setUser(current);
@@ -385,6 +415,30 @@ export default function AdminPage() {
 
       <section className="availability-panel">
         <div className="availability-heading">
+          <p className="eyebrow">Owner tool</p>
+          <h2>Standalone OEM parts lookup</h2>
+          <p className="muted">Find manufacturer-recommended parts without creating or opening a customer booking.</p>
+        </div>
+        <div className="parts-lookup-form">
+          <label>Equipment type<select value={partsEquipmentType} onChange={(event) => setPartsEquipmentType(event.target.value)}><option>Push mower</option><option>Riding mower</option><option>Zero turn</option><option>Tractor</option><option>Bush Hog</option><option>Other</option></select></label>
+          <label>Equipment make<input placeholder="Example: John Deere" value={partsEquipmentMake} onChange={(event) => setPartsEquipmentMake(event.target.value)} /></label>
+          <label>Equipment model<input placeholder="Example: Z530M" value={partsEquipmentModel} onChange={(event) => setPartsEquipmentModel(event.target.value)} /></label>
+          <label>Engine make<input placeholder="Example: Kawasaki" value={partsEngineMake} onChange={(event) => setPartsEngineMake(event.target.value)} /></label>
+          <label>Engine model<input placeholder="Example: FR691V" value={partsEngineModel} onChange={(event) => setPartsEngineModel(event.target.value)} /></label>
+          <label>Serial number<input placeholder="Optional" value={partsSerialNumber} onChange={(event) => setPartsSerialNumber(event.target.value)} /></label>
+          <label>Filter type<select value={partsFilterType} onChange={(event) => setPartsFilterType(event.target.value)}><option>Not sure</option><option>Standard residential</option><option>Commercial canister</option></select></label>
+        </div>
+        <div className="card-actions">
+          <a className={`button secondary small ${canLookupEngine ? "" : "disabled-link"}`} href={partsLookupUrl(ownerPartsLookup, "engine")} target="_blank" rel="noreferrer" aria-disabled={!canLookupEngine}>OEM lookup by engine</a>
+          <a className={`button secondary small ${canLookupEquipment ? "" : "disabled-link"}`} href={partsLookupUrl(ownerPartsLookup, "equipment")} target="_blank" rel="noreferrer" aria-disabled={!canLookupEquipment}>OEM lookup by equipment</a>
+          <a className={`button secondary small ${canSearchAmazon ? "" : "disabled-link"}`} href={amazonOemPartsUrl(ownerPartsLookup)} target="_blank" rel="noreferrer" aria-disabled={!canSearchAmazon}>Search OEM parts on Amazon</a>
+          <a className="button secondary small" href="https://www.amazon.com/gp/cart/view.html" target="_blank" rel="noreferrer">Open Amazon cart</a>
+        </div>
+        <p className="parts-lookup-note">Enter both the make and model to enable a lookup. Always verify the OEM part number in the official manufacturer catalog before ordering.</p>
+      </section>
+
+      <section className="availability-panel">
+        <div className="availability-heading">
           <div>
             <p className="eyebrow">Schedule controls</p>
             <h2>Block unavailable dates or times</h2>
@@ -443,7 +497,7 @@ export default function AdminPage() {
                 <div><div className="status-line"><span className={`status-badge status-${booking.status.toLowerCase()}`}>{booking.status}</span><span className={`payment-badge ${booking.paymentStatus === "Paid" ? "paid" : "unpaid"}`}>{booking.paymentStatus}</span></div><p className="eyebrow">{formatDate(booking.date)} · {booking.time}</p><h2>{booking.name}</h2><p>{booking.serviceName} ({booking.serviceDetail}) · {booking.city} · {visits} customer visit{visits === 1 ? "" : "s"}</p></div>
                 <strong>${booking.price}</strong>
               </div>
-              <div className="booking-card-grid"><div><span>Address</span><p>{booking.address}, {booking.city}</p></div><div><span>Contact</span><p><a href={`tel:${booking.phone}`}>{booking.phone}</a>{booking.email && <><br /><a href={`mailto:${booking.email}`}>{booking.email}</a></>}</p></div><div><span>Notes</span><p>{booking.notes || "None"}</p></div>{booking.jobType === "maintenance" && <div className="full-field"><span>Genuine OEM parts lookup</span><p><strong>Equipment:</strong> {booking.equipmentMake} {booking.equipmentModel}<br /><strong>Engine:</strong> {booking.engineMake} {booking.engineModel}<br /><strong>Filter:</strong> {booking.filterType || "Not specified"}{booking.serialNumber ? <><br /><strong>Serial:</strong> {booking.serialNumber}</> : null}</p><div className="card-actions"><a className="button secondary small" href={partsLookupUrl(booking, "engine")} target="_blank" rel="noreferrer">OEM lookup by engine</a><a className="button secondary small" href={partsLookupUrl(booking, "equipment")} target="_blank" rel="noreferrer">OEM lookup by equipment</a><a className="button secondary small" href={amazonOemPartsUrl(booking)} target="_blank" rel="noreferrer">Search OEM parts on Amazon</a><a className="button secondary small" href="https://www.amazon.com/gp/cart/view.html" target="_blank" rel="noreferrer">Open Amazon cart</a></div><small className="muted">Use the official manufacturer catalog to verify the OEM part number before selecting an Amazon listing and adding it to your cart.</small></div>}</div>
+              <div className="booking-card-grid"><div><span>Address</span><p>{booking.address}, {booking.city}</p></div><div><span>Contact</span><p><a href={`tel:${booking.phone}`}>{booking.phone}</a>{booking.email && <><br /><a href={`mailto:${booking.email}`}>{booking.email}</a></>}</p></div><div><span>Notes</span><p>{booking.notes || "None"}</p></div>{booking.jobType === "maintenance" && <div className="full-field"><span>Genuine OEM parts lookup</span><p><strong>Equipment:</strong> {booking.equipmentMake} {booking.equipmentModel}<br /><strong>Engine:</strong> {booking.engineMake} {booking.engineModel}<br /><strong>Filter:</strong> {booking.filterType || "Not specified"}{booking.serialNumber ? <><br /><strong>Serial:</strong> {booking.serialNumber}</> : null}</p><div className="card-actions"><a className="button secondary small" href={partsLookupUrl({ ...booking, equipmentType: booking.serviceName }, "engine")} target="_blank" rel="noreferrer">OEM lookup by engine</a><a className="button secondary small" href={partsLookupUrl({ ...booking, equipmentType: booking.serviceName }, "equipment")} target="_blank" rel="noreferrer">OEM lookup by equipment</a><a className="button secondary small" href={amazonOemPartsUrl({ ...booking, equipmentType: booking.serviceName })} target="_blank" rel="noreferrer">Search OEM parts on Amazon</a><a className="button secondary small" href="https://www.amazon.com/gp/cart/view.html" target="_blank" rel="noreferrer">Open Amazon cart</a></div><small className="muted">Use the official manufacturer catalog to verify the OEM part number before selecting an Amazon listing and adding it to your cart.</small></div>}</div>
               <div className="management-row"><label>Service<select value={booking.jobType || "sharpening"} onChange={(e) => updateBladeService(booking, e.target.value, booking.bladeCount || 1)}><option value="sharpening">Sharpen blades</option><option value="blade-changing">Change blades</option><option value="maintenance">Basic Maintenance</option></select></label>{booking.jobType !== "maintenance" && <label>Blades<select value={booking.bladeCount || 1} onChange={(e) => updateBladeService(booking, booking.jobType || "sharpening", Number(e.target.value))}>{[1, 2, 3, 4, 5, 6].map((count) => <option key={count} value={count}>{count}</option>)}</select></label>}<label>Status<select value={booking.status} onChange={(e) => update(booking, { status: e.target.value as BookingStatus })}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Payment<select value={booking.paymentStatus} onChange={(e) => update(booking, { paymentStatus: e.target.value as PaymentStatus })}><option>Unpaid</option><option>Paid</option></select></label><label>Method<select value={booking.paymentMethod || ""} onChange={(e) => update(booking, { paymentMethod: e.target.value as Booking["paymentMethod"] })}>{paymentMethods.map((item) => <option key={item} value={item}>{item || "Not selected"}</option>)}</select></label></div>
               <div className="card-actions"><a className="button primary small" href={`tel:${booking.phone}`}>Call</a><a className="button secondary small" href={`sms:${booking.phone}`}>Text</a>{booking.email && <button className="button secondary small" type="button" disabled={sendingConfirmation === booking.id} onClick={() => sendConfirmation(booking)}>{sendingConfirmation === booking.id ? "Sending email..." : "Send confirmation email"}</button>}<a className="button secondary small" href={`sms:${booking.phone}?body=${onMyWay}`}>I&apos;m on my way</a><a className="button secondary small" href={`sms:${booking.phone}?body=${reviewRequest}`}>Review message</a><a className="button secondary small" target="_blank" rel="noreferrer" href={mapsSearchUrl(booking)}>Directions</a><button className="button danger small" onClick={() => remove(booking.id)}>Delete</button></div>
             </article>;

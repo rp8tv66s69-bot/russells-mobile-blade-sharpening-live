@@ -151,6 +151,7 @@ export default function BookingPage() {
   const [jobType, setJobType] = useState("");
   const [selectedMowerType, setSelectedMowerType] = useState("");
   const [bladeCount, setBladeCount] = useState(0);
+  const [bladeSupplier, setBladeSupplier] = useState("");
   const [equipmentMake, setEquipmentMake] = useState("");
   const [equipmentModel, setEquipmentModel] = useState("");
   const [customEquipmentMake, setCustomEquipmentMake] = useState("");
@@ -208,6 +209,7 @@ export default function BookingPage() {
     );
     const selectedBladeCount = Number(form.get("bladeCount") || 0);
     const selectedJobType = String(form.get("jobType") || "");
+    const selectedBladeSupplier = String(form.get("bladeSupplier") || "");
     const selectedMake = String(form.get("equipmentMake") || "").trim();
     const selectedModel = String(form.get("equipmentModel") || "").trim();
     const selectedEngineMake = String(form.get("engineMake") || "").trim();
@@ -229,6 +231,15 @@ export default function BookingPage() {
 
     if (selectedJobType !== "maintenance" && !bladeQuantities.includes(selectedBladeCount)) {
       setError("Please select the number of blades.");
+      setSaving(false);
+      return;
+    }
+
+    if (
+      selectedJobType === "blade-changing" &&
+      !["Customer supplied", "Russell supplied"].includes(selectedBladeSupplier)
+    ) {
+      setError("Please choose who will supply the replacement blades.");
       setSaving(false);
       return;
     }
@@ -261,9 +272,13 @@ export default function BookingPage() {
       serviceDetail:
         selectedJobType === "maintenance"
           ? `Basic Maintenance · ${selectedMake} ${selectedModel} · parts additional`
-          : `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}`,
+          : `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}${selectedJobType === "blade-changing" ? ` · ${selectedBladeSupplier}` : ""}`,
       jobType: selectedJobType,
       bladeCount: selectedJobType === "maintenance" ? 0 : selectedBladeCount,
+      bladeSupplier:
+        selectedJobType === "blade-changing"
+          ? (selectedBladeSupplier as "Customer supplied" | "Russell supplied")
+          : "",
       equipmentMake: selectedJobType === "maintenance" ? selectedMake : "",
       equipmentModel: selectedJobType === "maintenance" ? selectedModel : "",
       engineMake: selectedJobType === "maintenance" ? selectedEngineMake : "",
@@ -324,6 +339,7 @@ export default function BookingPage() {
             engineModel: booking.engineModel,
             serialNumber: booking.serialNumber,
             filterType: booking.filterType,
+            bladeSupplier: booking.bladeSupplier,
             price: booking.price,
             date: booking.date,
             time: booking.time,
@@ -345,6 +361,7 @@ export default function BookingPage() {
       setJobType("");
       setSelectedMowerType("");
       setBladeCount(0);
+      setBladeSupplier("");
       setEquipmentMake("");
       setEquipmentModel("");
       setCustomEquipmentMake("");
@@ -453,6 +470,7 @@ export default function BookingPage() {
                   setJobType(event.target.value);
                   setSelectedMowerType("");
                   setBladeCount(0);
+                  setBladeSupplier("");
                 }}
               >
                 <option value="" disabled>Choose a service</option>
@@ -543,6 +561,42 @@ export default function BookingPage() {
               </label>
             )}
           </div>
+
+          {jobType === "blade-changing" && (
+            <fieldset className="blade-supplier-choice">
+              <legend>Who will supply the replacement blades? *</legend>
+              <div className="blade-supplier-options">
+                <label>
+                  <input
+                    type="radio"
+                    name="bladeSupplier"
+                    value="Customer supplied"
+                    required
+                    checked={bladeSupplier === "Customer supplied"}
+                    onChange={(event) => setBladeSupplier(event.target.value)}
+                  />
+                  <span>
+                    <strong>Customer supplied</strong>
+                    <small>Have the correct replacement blades ready at the appointment.</small>
+                  </span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="bladeSupplier"
+                    value="Russell supplied"
+                    required
+                    checked={bladeSupplier === "Russell supplied"}
+                    onChange={(event) => setBladeSupplier(event.target.value)}
+                  />
+                  <span>
+                    <strong>Russell supplied</strong>
+                    <small>Replacement blades and the parts charge will be confirmed before service.</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+          )}
 
           <div className="price-calculation" aria-live="polite">
             {isMaintenance ? (

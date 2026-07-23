@@ -13,6 +13,7 @@ type BookingNotification = {
   equipmentModel?: string;
   engineMake?: string;
   engineModel?: string;
+  engineHorsepower?: string;
   serialNumber?: string;
   filterType?: string;
   bladeSupplier?: string;
@@ -98,6 +99,7 @@ export async function POST(req: Request) {
         <p><strong>Service:</strong> ${booking.service}${booking.serviceDetail ? ` (${booking.serviceDetail})` : ""}</p>
         ${booking.equipmentMake ? `<p><strong>Equipment:</strong> ${booking.equipmentMake} ${booking.equipmentModel || ""}</p>` : ""}
         ${booking.engineMake ? `<p><strong>Engine:</strong> ${booking.engineMake} ${booking.engineModel || ""}</p>` : ""}
+        ${booking.engineHorsepower ? `<p><strong>Engine horsepower:</strong> ${booking.engineHorsepower}</p>` : ""}
         ${booking.serialNumber ? `<p><strong>Serial number:</strong> ${booking.serialNumber}</p>` : ""}
         ${booking.filterType ? `<p><strong>Filter type:</strong> ${booking.filterType}</p>` : ""}
         ${booking.bladeSupplier ? `<p><strong>Replacement blades:</strong> ${booking.bladeSupplier}${booking.bladeSupplier === "Russell supplied" ? " — parts cost plus 15% sourcing and handling ($10 minimum)" : ""}</p>` : ""}

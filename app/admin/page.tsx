@@ -14,6 +14,9 @@ const filterOptions = ["Today", "Upcoming", "Unpaid", "Completed", "Customers", 
 type Filter = (typeof filterOptions)[number];
 
 function servicePrice(jobType: string, serviceId: string, bladeCount: number) {
+  if (jobType === "maintenance") {
+    return ({ "push-mower": 55, "riding-mower": 85, "zero-turn": 95, tractor: 125 } as Record<string, number>)[serviceId] || 0;
+  }
   if (jobType === "blade-changing") {
     return bladeCount * (serviceId === "bush-hog" ? 20 : 10);
   }
@@ -48,6 +51,18 @@ function customerKey(booking: Booking) {
 
 function mapsSearchUrl(booking: Booking) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${booking.address}, ${booking.city}, LA`)}`;
+}
+
+function oemPartsLookupUrl(booking: Booking) {
+  const identifiers = [
+    booking.equipmentMake,
+    booking.equipmentModel,
+    booking.engineMake,
+    booking.engineModel,
+    booking.serialNumber,
+    "manufacturer maintenance parts oil filter air filter fuel filter spark plug oil capacity",
+  ].filter(Boolean).join(" ");
+  return `https://www.google.com/search?q=${encodeURIComponent(identifiers)}`;
 }
 
 function routeUrl(bookings: Booking[]) {
@@ -212,9 +227,11 @@ export default function AdminPage() {
     jobType: string,
     bladeCount: number,
   ) {
-    const normalizedJobType = jobType === "blade-changing" ? "blade-changing" : "sharpening";
-    const normalizedBladeCount = Math.max(1, Math.min(6, bladeCount));
-    const serviceDetail = `${normalizedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${normalizedBladeCount} ${normalizedBladeCount === 1 ? "blade" : "blades"}`;
+    const normalizedJobType = ["blade-changing", "maintenance"].includes(jobType) ? jobType : "sharpening";
+    const normalizedBladeCount = normalizedJobType === "maintenance" ? 0 : Math.max(1, Math.min(6, bladeCount));
+    const serviceDetail = normalizedJobType === "maintenance"
+      ? `Basic Maintenance · ${booking.equipmentMake || "Make needed"} ${booking.equipmentModel || "Model needed"} · parts additional`
+      : `${normalizedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${normalizedBladeCount} ${normalizedBladeCount === 1 ? "blade" : "blades"}`;
 
     await update(booking, {
       jobType: normalizedJobType,
@@ -403,8 +420,8 @@ export default function AdminPage() {
                 <div><div className="status-line"><span className={`status-badge status-${booking.status.toLowerCase()}`}>{booking.status}</span><span className={`payment-badge ${booking.paymentStatus === "Paid" ? "paid" : "unpaid"}`}>{booking.paymentStatus}</span></div><p className="eyebrow">{formatDate(booking.date)} · {booking.time}</p><h2>{booking.name}</h2><p>{booking.serviceName} ({booking.serviceDetail}) · {booking.city} · {visits} customer visit{visits === 1 ? "" : "s"}</p></div>
                 <strong>${booking.price}</strong>
               </div>
-              <div className="booking-card-grid"><div><span>Address</span><p>{booking.address}, {booking.city}</p></div><div><span>Contact</span><p><a href={`tel:${booking.phone}`}>{booking.phone}</a>{booking.email && <><br /><a href={`mailto:${booking.email}`}>{booking.email}</a></>}</p></div><div><span>Notes</span><p>{booking.notes || "None"}</p></div></div>
-              <div className="management-row"><label>Service<select value={booking.jobType || "sharpening"} onChange={(e) => updateBladeService(booking, e.target.value, booking.bladeCount || 1)}><option value="sharpening">Sharpen blades</option><option value="blade-changing">Change blades</option></select></label><label>Blades<select value={booking.bladeCount || 1} onChange={(e) => updateBladeService(booking, booking.jobType || "sharpening", Number(e.target.value))}>{[1, 2, 3, 4, 5, 6].map((count) => <option key={count} value={count}>{count}</option>)}</select></label><label>Status<select value={booking.status} onChange={(e) => update(booking, { status: e.target.value as BookingStatus })}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Payment<select value={booking.paymentStatus} onChange={(e) => update(booking, { paymentStatus: e.target.value as PaymentStatus })}><option>Unpaid</option><option>Paid</option></select></label><label>Method<select value={booking.paymentMethod || ""} onChange={(e) => update(booking, { paymentMethod: e.target.value as Booking["paymentMethod"] })}>{paymentMethods.map((item) => <option key={item} value={item}>{item || "Not selected"}</option>)}</select></label></div>
+              <div className="booking-card-grid"><div><span>Address</span><p>{booking.address}, {booking.city}</p></div><div><span>Contact</span><p><a href={`tel:${booking.phone}`}>{booking.phone}</a>{booking.email && <><br /><a href={`mailto:${booking.email}`}>{booking.email}</a></>}</p></div><div><span>Notes</span><p>{booking.notes || "None"}</p></div>{booking.jobType === "maintenance" && <div className="full-field"><span>Equipment and OEM parts lookup</span><p><strong>{booking.equipmentMake} {booking.equipmentModel}</strong><br />Engine: {booking.engineMake} {booking.engineModel}{booking.serialNumber ? <><br />Serial: {booking.serialNumber}</> : null}</p><a className="text-link" href={oemPartsLookupUrl(booking)} target="_blank" rel="noreferrer">Find manufacturer-recommended parts and supplies</a></div>}</div>
+              <div className="management-row"><label>Service<select value={booking.jobType || "sharpening"} onChange={(e) => updateBladeService(booking, e.target.value, booking.bladeCount || 1)}><option value="sharpening">Sharpen blades</option><option value="blade-changing">Change blades</option><option value="maintenance">Basic Maintenance</option></select></label>{booking.jobType !== "maintenance" && <label>Blades<select value={booking.bladeCount || 1} onChange={(e) => updateBladeService(booking, booking.jobType || "sharpening", Number(e.target.value))}>{[1, 2, 3, 4, 5, 6].map((count) => <option key={count} value={count}>{count}</option>)}</select></label>}<label>Status<select value={booking.status} onChange={(e) => update(booking, { status: e.target.value as BookingStatus })}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Payment<select value={booking.paymentStatus} onChange={(e) => update(booking, { paymentStatus: e.target.value as PaymentStatus })}><option>Unpaid</option><option>Paid</option></select></label><label>Method<select value={booking.paymentMethod || ""} onChange={(e) => update(booking, { paymentMethod: e.target.value as Booking["paymentMethod"] })}>{paymentMethods.map((item) => <option key={item} value={item}>{item || "Not selected"}</option>)}</select></label></div>
               <div className="card-actions"><a className="button primary small" href={`tel:${booking.phone}`}>Call</a><a className="button secondary small" href={`sms:${booking.phone}`}>Text</a>{booking.email && <button className="button secondary small" type="button" disabled={sendingConfirmation === booking.id} onClick={() => sendConfirmation(booking)}>{sendingConfirmation === booking.id ? "Sending email..." : "Send confirmation email"}</button>}<a className="button secondary small" href={`sms:${booking.phone}?body=${onMyWay}`}>I&apos;m on my way</a><a className="button secondary small" href={`sms:${booking.phone}?body=${reviewRequest}`}>Review message</a><a className="button secondary small" target="_blank" rel="noreferrer" href={mapsSearchUrl(booking)}>Directions</a><button className="button danger small" onClick={() => remove(booking.id)}>Delete</button></div>
             </article>;
           })}

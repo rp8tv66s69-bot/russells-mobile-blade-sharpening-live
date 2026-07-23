@@ -119,6 +119,7 @@ export default function BookingPage() {
   const [engineMake, setEngineMake] = useState("");
   const [engineModel, setEngineModel] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
+  const [filterType, setFilterType] = useState("");
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const isMaintenance = jobType === "maintenance";
   const currentPricePerBlade = pricePerBlade(jobType, selectedMowerType);
@@ -165,6 +166,7 @@ export default function BookingPage() {
     const selectedEngineMake = String(form.get("engineMake") || "").trim();
     const selectedEngineModel = String(form.get("engineModel") || "").trim();
     const selectedSerialNumber = String(form.get("serialNumber") || "").trim();
+    const selectedFilterType = String(form.get("filterType") || "");
 
     if (!["sharpening", "blade-changing", "maintenance"].includes(selectedJobType)) {
       setError("Please select a service.");
@@ -190,8 +192,8 @@ export default function BookingPage() {
         setSaving(false);
         return;
       }
-      if (!selectedMake || !selectedModel || !selectedEngineMake || !selectedEngineModel) {
-        setError("Please enter the equipment and engine make and model.");
+      if (!selectedMake || !selectedModel || !selectedEngineMake || !selectedEngineModel || !selectedFilterType) {
+        setError("Please enter the equipment and engine details, including the filter type.");
         setSaving(false);
         return;
       }
@@ -220,6 +222,7 @@ export default function BookingPage() {
       engineMake: selectedJobType === "maintenance" ? selectedEngineMake : "",
       engineModel: selectedJobType === "maintenance" ? selectedEngineModel : "",
       serialNumber: selectedJobType === "maintenance" ? selectedSerialNumber : "",
+      filterType: selectedJobType === "maintenance" ? selectedFilterType : "",
       price:
         selectedJobType === "maintenance"
           ? maintenancePrices[selectedService.id]
@@ -268,6 +271,12 @@ export default function BookingPage() {
             city: booking.city,
             service: booking.serviceName,
             serviceDetail: booking.serviceDetail,
+            equipmentMake: booking.equipmentMake,
+            equipmentModel: booking.equipmentModel,
+            engineMake: booking.engineMake,
+            engineModel: booking.engineModel,
+            serialNumber: booking.serialNumber,
+            filterType: booking.filterType,
             price: booking.price,
             date: booking.date,
             time: booking.time,
@@ -294,6 +303,7 @@ export default function BookingPage() {
       setEngineMake("");
       setEngineModel("");
       setSerialNumber("");
+      setFilterType("");
       setSubmitted(booking);
     } catch (bookingError) {
       console.error("Unable to reserve appointment:", bookingError);
@@ -439,6 +449,15 @@ export default function BookingPage() {
                 <label>
                   <span>Serial number (recommended)</span>
                   <input name="serialNumber" value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} placeholder="Equipment or engine serial number" />
+                </label>
+                <label>
+                  <span>Filter type *</span>
+                  <select name="filterType" required value={filterType} onChange={(event) => setFilterType(event.target.value)}>
+                    <option value="" disabled>Choose filter type</option>
+                    <option value="Standard residential">Standard residential</option>
+                    <option value="Commercial canister">Commercial canister</option>
+                    <option value="Not sure">Not sure</option>
+                  </select>
                 </label>
               </>
             ) : (

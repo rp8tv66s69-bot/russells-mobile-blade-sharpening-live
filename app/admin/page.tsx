@@ -20,6 +20,7 @@ const equipmentModels: Record<string, string[]> = {
   "Bush Hog": ["BH100", "BH200", "BH300", "SQ Series", "Razorback Series"],
   Craftsman: ["M100", "M110", "M210", "T100", "T110", "T210", "Z5200"],
   "Cub Cadet": ["SC Series", "XT1", "XT2", "Ultima ZT1", "Ultima ZT2"],
+  "Dixie Chopper": ["Falcon HP", "Falcon HPX", "Zee 2", "Zee 2 HP", "BlackHawk", "BlackHawk HP", "Eagle", "Eagle HP", "Classic", "Xcaliber", "Magnum", "Silver Eagle", "Zee 1", "RZT"],
   Exmark: ["Quest", "Radius", "Lazer Z", "Navigator"],
   Ferris: ["IS 600", "IS 700", "ISX 800", "ISX 2200", "F Series"],
   Gravely: ["ZT X", "ZT XL", "Pro-Turn Z", "Pro-Turn ZX", "Pro-Turn 300"],

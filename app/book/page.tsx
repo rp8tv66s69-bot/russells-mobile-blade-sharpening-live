@@ -408,7 +408,7 @@ export default function BookingPage() {
               Russell will order the correct replacement blades and let you know
               when he can perform the service based on the parts arrival date.
               Your requested date and time are tentative until Russell confirms them.
-              Replacement blades are billed at the parts cost plus a 25% sourcing
+              Replacement blades are billed at the parts cost plus a 15% sourcing
               and handling charge, with a $10 minimum.
             </p>
           )}
@@ -600,7 +600,7 @@ export default function BookingPage() {
                   />
                   <span>
                     <strong>Russell supplied</strong>
-                    <small>Parts cost plus a 25% sourcing and handling charge ($10 minimum). The service date depends on when the blades arrive.</small>
+                    <small>Parts cost plus a 15% sourcing and handling charge ($10 minimum). The service date depends on when the blades arrive.</small>
                   </span>
                 </label>
               </div>
@@ -609,7 +609,7 @@ export default function BookingPage() {
                   Your requested appointment is tentative. Russell will order the
                   correct blades and contact you with the service date after the
                   parts arrival date is known. Replacement blades are billed at
-                  the parts cost plus a 25% sourcing and handling charge, with a
+                  the parts cost plus a 15% sourcing and handling charge, with a
                   $10 minimum.
                 </p>
               )}
@@ -630,7 +630,7 @@ export default function BookingPage() {
             )}
           </div>
           {isMaintenance ? (
-            <p className="custom-service-caption">Russell-supplied parts include a 25% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
+            <p className="custom-service-caption">Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
           ) : jobType === "blade-changing" ? (
             <div className="blade-changing-booking-summary">
               <strong>Blade changing only</strong>
@@ -638,7 +638,7 @@ export default function BookingPage() {
               <ul>
                 <li>Mower blades: $10 per blade</li>
                 <li>Bush Hog blades: $25 per blade</li>
-                <li>Russell-supplied blades: parts cost plus a 25% sourcing and handling charge ($10 minimum)</li>
+                <li>Russell-supplied blades: parts cost plus a 15% sourcing and handling charge ($10 minimum)</li>
               </ul>
             </div>
           ) : null}

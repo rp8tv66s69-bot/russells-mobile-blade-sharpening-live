@@ -18,6 +18,7 @@ export type Booking = {
   equipmentModel?: string;
   engineMake?: string;
   engineModel?: string;
+  engineHorsepower?: string;
   serialNumber?: string;
   filterType?: string;
   price: number;

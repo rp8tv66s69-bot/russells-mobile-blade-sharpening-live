@@ -12,9 +12,17 @@ const mowerTypes = [
   { id: "riding-mower", name: "Riding Mower" },
   { id: "zero-turn", name: "Zero Turn" },
   { id: "bush-hog", name: "Bush Hog" },
+  { id: "tractor", name: "Tractor" },
 ];
 
 const bladeQuantities = [1, 2, 3, 4, 5, 6];
+const maintenanceAvailableDate = "2026-07-31";
+const maintenancePrices: Record<string, number> = {
+  "push-mower": 55,
+  "riding-mower": 85,
+  "zero-turn": 95,
+  tractor: 125,
+};
 
 function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
@@ -106,8 +114,15 @@ export default function BookingPage() {
   const [jobType, setJobType] = useState("");
   const [selectedMowerType, setSelectedMowerType] = useState("");
   const [bladeCount, setBladeCount] = useState(0);
+  const [equipmentMake, setEquipmentMake] = useState("");
+  const [equipmentModel, setEquipmentModel] = useState("");
+  const [engineMake, setEngineMake] = useState("");
+  const [engineModel, setEngineModel] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+  const isMaintenance = jobType === "maintenance";
   const currentPricePerBlade = pricePerBlade(jobType, selectedMowerType);
+  const maintenanceLaborPrice = maintenancePrices[selectedMowerType] || 0;
 
   useEffect(() => {
     return onSnapshot(
@@ -145,8 +160,13 @@ export default function BookingPage() {
     );
     const selectedBladeCount = Number(form.get("bladeCount") || 0);
     const selectedJobType = String(form.get("jobType") || "");
+    const selectedMake = String(form.get("equipmentMake") || "").trim();
+    const selectedModel = String(form.get("equipmentModel") || "").trim();
+    const selectedEngineMake = String(form.get("engineMake") || "").trim();
+    const selectedEngineModel = String(form.get("engineModel") || "").trim();
+    const selectedSerialNumber = String(form.get("serialNumber") || "").trim();
 
-    if (!['sharpening', 'blade-changing'].includes(selectedJobType)) {
+    if (!["sharpening", "blade-changing", "maintenance"].includes(selectedJobType)) {
       setError("Please select a service.");
       setSaving(false);
       return;
@@ -158,10 +178,23 @@ export default function BookingPage() {
       return;
     }
 
-    if (!bladeQuantities.includes(selectedBladeCount)) {
+    if (selectedJobType !== "maintenance" && !bladeQuantities.includes(selectedBladeCount)) {
       setError("Please select the number of blades.");
       setSaving(false);
       return;
+    }
+
+    if (selectedJobType === "maintenance") {
+      if (!maintenancePrices[selectedService.id]) {
+        setError("Basic Maintenance is available for push mowers, riding mowers, zero turns, and tractors.");
+        setSaving(false);
+        return;
+      }
+      if (!selectedMake || !selectedModel || !selectedEngineMake || !selectedEngineModel) {
+        setError("Please enter the equipment and engine make and model.");
+        setSaving(false);
+        return;
+      }
     }
 
     const date = String(form.get("date") || "");
@@ -176,10 +209,21 @@ export default function BookingPage() {
       city: String(form.get("city") || "").trim(),
       serviceId: selectedService.id,
       serviceName: selectedService.name,
-      serviceDetail: `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}`,
+      serviceDetail:
+        selectedJobType === "maintenance"
+          ? `Basic Maintenance · ${selectedMake} ${selectedModel} · parts additional`
+          : `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}`,
       jobType: selectedJobType,
-      bladeCount: selectedBladeCount,
-      price: selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id),
+      bladeCount: selectedJobType === "maintenance" ? 0 : selectedBladeCount,
+      equipmentMake: selectedJobType === "maintenance" ? selectedMake : "",
+      equipmentModel: selectedJobType === "maintenance" ? selectedModel : "",
+      engineMake: selectedJobType === "maintenance" ? selectedEngineMake : "",
+      engineModel: selectedJobType === "maintenance" ? selectedEngineModel : "",
+      serialNumber: selectedJobType === "maintenance" ? selectedSerialNumber : "",
+      price:
+        selectedJobType === "maintenance"
+          ? maintenancePrices[selectedService.id]
+          : selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id),
       date,
       time,
       notes: String(form.get("notes") || "").trim(),
@@ -245,6 +289,11 @@ export default function BookingPage() {
       setJobType("");
       setSelectedMowerType("");
       setBladeCount(0);
+      setEquipmentMake("");
+      setEquipmentModel("");
+      setEngineMake("");
+      setEngineModel("");
+      setSerialNumber("");
       setSubmitted(booking);
     } catch (bookingError) {
       console.error("Unable to reserve appointment:", bookingError);
@@ -315,7 +364,7 @@ export default function BookingPage() {
 
       <section className="booking-intro">
         <p className="eyebrow">Veteran Owned · Online appointment request</p>
-        <h1>Book mobile blade sharpening</h1>
+        <h1>Book mobile blade or Basic Maintenance service</h1>
         <p>
           Friday and Saturday, 8:00 AM–5:00 PM throughout Washington Parish,
           St. Tammany Parish, and Tangipahoa Parish.
@@ -327,8 +376,8 @@ export default function BookingPage() {
           <div className="form-section-heading">
             <span>1</span>
             <div>
-              <h2>Choose service, mower type, and blade quantity</h2>
-              <p>Sharpening starts at $20 per blade. Blade changing is $10 per mower blade or $20 per Bush Hog blade. <strong className="customer-supplied-warning">Customers must supply all replacement blades.</strong></p>
+              <h2>Choose your service and equipment</h2>
+              <p>Basic Maintenance appointments begin July 31, 2026. Maintenance prices are labor only; oil, filters, spark plugs, and other parts are additional.</p>
             </div>
           </div>
 
@@ -339,11 +388,16 @@ export default function BookingPage() {
                 name="jobType"
                 required
                 value={jobType}
-                onChange={(event) => setJobType(event.target.value)}
+                onChange={(event) => {
+                  setJobType(event.target.value);
+                  setSelectedMowerType("");
+                  setBladeCount(0);
+                }}
               >
                 <option value="" disabled>Choose a service</option>
                 <option value="sharpening">Blade sharpening</option>
                 <option value="blade-changing">Blade changing only</option>
+                <option value="maintenance">Basic Maintenance</option>
               </select>
             </label>
 
@@ -355,35 +409,69 @@ export default function BookingPage() {
                 value={selectedMowerType}
                 onChange={(event) => setSelectedMowerType(event.target.value)}
               >
-                <option value="" disabled>Choose mower type</option>
-                {mowerTypes.map((mower) => (
+                <option value="" disabled>Choose equipment type</option>
+                {mowerTypes.filter((mower) =>
+                  isMaintenance ? mower.id !== "bush-hog" : mower.id !== "tractor"
+                ).map((mower) => (
                   <option key={mower.id} value={mower.id}>{mower.name}</option>
                 ))}
               </select>
             </label>
 
-            <label>
-              <span>Number of blades *</span>
-              <select
-                name="bladeCount"
-                required
-                value={bladeCount || ""}
-                onChange={(event) => setBladeCount(Number(event.target.value))}
-              >
-                <option value="" disabled>Choose blade quantity</option>
-                {bladeQuantities.map((quantity) => (
-                  <option key={quantity} value={quantity}>
-                    {quantity} {quantity === 1 ? "blade" : "blades"}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {isMaintenance ? (
+              <>
+                <label>
+                  <span>Equipment make *</span>
+                  <input name="equipmentMake" required value={equipmentMake} onChange={(event) => setEquipmentMake(event.target.value)} placeholder="Example: John Deere" />
+                </label>
+                <label>
+                  <span>Equipment model *</span>
+                  <input name="equipmentModel" required value={equipmentModel} onChange={(event) => setEquipmentModel(event.target.value)} placeholder="Example: Z530M" />
+                </label>
+                <label>
+                  <span>Engine manufacturer *</span>
+                  <input name="engineMake" required value={engineMake} onChange={(event) => setEngineMake(event.target.value)} placeholder="Example: Kawasaki" />
+                </label>
+                <label>
+                  <span>Engine model *</span>
+                  <input name="engineModel" required value={engineModel} onChange={(event) => setEngineModel(event.target.value)} placeholder="Shown on the engine label" />
+                </label>
+                <label>
+                  <span>Serial number (recommended)</span>
+                  <input name="serialNumber" value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} placeholder="Equipment or engine serial number" />
+                </label>
+              </>
+            ) : (
+              <label>
+                <span>Number of blades *</span>
+                <select name="bladeCount" required value={bladeCount || ""} onChange={(event) => setBladeCount(Number(event.target.value))}>
+                  <option value="" disabled>Choose blade quantity</option>
+                  {bladeQuantities.map((quantity) => (
+                    <option key={quantity} value={quantity}>{quantity} {quantity === 1 ? "blade" : "blades"}</option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
 
           <div className="price-calculation" aria-live="polite">
-            <span>{bladeCount ? `${bladeCount} × $${currentPricePerBlade} per blade` : jobType ? `$${currentPricePerBlade} per blade` : "Select a service to see pricing"}</span>
-            <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
+            {isMaintenance ? (
+              <>
+                <span>{selectedMowerType ? "Labor price · parts additional" : "Select equipment to see maintenance pricing"}</span>
+                <strong>{selectedMowerType ? `Starting at $${maintenanceLaborPrice}` : "Available July 31"}</strong>
+              </>
+            ) : (
+              <>
+                <span>{bladeCount ? `${bladeCount} × $${currentPricePerBlade} per blade` : jobType ? `$${currentPricePerBlade} per blade` : "Select a service to see pricing"}</span>
+                <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
+              </>
+            )}
           </div>
+          {isMaintenance ? (
+            <p className="custom-service-caption">Russell-supplied parts include a 25% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
+          ) : jobType === "blade-changing" ? (
+            <p><strong className="customer-supplied-warning">Customers must supply all replacement blades.</strong></p>
+          ) : null}
           <p className="custom-service-caption">
             Need something other than blade services?{" "}
             <a href="sms:+19852951163">Let me know.</a>
@@ -421,9 +509,14 @@ export default function BookingPage() {
                   <option
                     key={dateValue(date)}
                     value={dateValue(date)}
-                    disabled={blockedDates.has(dateValue(date))}
+                    disabled={blockedDates.has(dateValue(date)) || (isMaintenance && dateValue(date) < maintenanceAvailableDate)}
                   >
-                    {formatDate(date)}{blockedDates.has(dateValue(date)) ? " (Unavailable)" : ""}
+                    {formatDate(date)}
+                    {blockedDates.has(dateValue(date))
+                      ? " (Unavailable)"
+                      : isMaintenance && dateValue(date) < maintenanceAvailableDate
+                        ? " (Basic Maintenance begins July 31)"
+                        : ""}
                   </option>
                 ))}
               </select>

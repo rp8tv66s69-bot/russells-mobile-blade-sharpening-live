@@ -13,6 +13,13 @@ const appointmentTimes = ["All day", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM
 const filterOptions = ["Today", "Upcoming", "Unpaid", "Completed", "Customers", "All"] as const;
 type Filter = (typeof filterOptions)[number];
 
+function servicePrice(jobType: string, serviceId: string, bladeCount: number) {
+  if (jobType === "blade-changing") {
+    return bladeCount * (serviceId === "bush-hog" ? 20 : 10);
+  }
+  return bladeCount * (serviceId === "bush-hog" ? 40 : 20);
+}
+
 function localDateValue(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -27,6 +34,12 @@ function formatDate(value: string) {
   if (!value) return "No date";
   const date = new Date(`${value}T12:00:00`);
   return new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" }).format(date);
+}
+
+function addMonths(value: string, months: number) {
+  const date = new Date(`${value}T12:00:00`);
+  date.setMonth(date.getMonth() + months);
+  return localDateValue(date);
 }
 
 function customerKey(booking: Booking) {
@@ -54,6 +67,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [dataError, setDataError] = useState("");
   const [sendingConfirmation, setSendingConfirmation] = useState<string | null>(null);
+  const [sendingSeasonalReminder, setSendingSeasonalReminder] = useState<string | null>(null);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [blockDate, setBlockDate] = useState("");
   const [blockTime, setBlockTime] = useState("All day");
@@ -193,6 +207,70 @@ export default function AdminPage() {
     }
   }
 
+  async function updateBladeService(
+    booking: Booking,
+    jobType: string,
+    bladeCount: number,
+  ) {
+    const normalizedJobType = jobType === "blade-changing" ? "blade-changing" : "sharpening";
+    const normalizedBladeCount = Math.max(1, Math.min(6, bladeCount));
+    const serviceDetail = `${normalizedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${normalizedBladeCount} ${normalizedBladeCount === 1 ? "blade" : "blades"}`;
+
+    await update(booking, {
+      jobType: normalizedJobType,
+      bladeCount: normalizedBladeCount,
+      serviceDetail,
+      price: servicePrice(normalizedJobType, booking.serviceId, normalizedBladeCount),
+    });
+  }
+
+  async function sendSeasonalReminder(booking: Booking) {
+    if (!booking.email) {
+      window.alert("This customer did not provide an email address.");
+      return;
+    }
+
+    if (!user) {
+      window.alert("Your owner session has expired. Please sign in again.");
+      return;
+    }
+
+    setSendingSeasonalReminder(booking.id);
+    try {
+      const idToken = await user.getIdToken(true);
+      const response = await fetch("/api/seasonal-reminder", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: booking.id,
+          name: booking.name,
+          email: booking.email,
+          lastServiceDate: booking.date,
+          serviceName: booking.serviceName,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Seasonal reminder failed:", await response.text());
+        window.alert("The seasonal reminder email could not be sent.");
+        return;
+      }
+
+      await updateDoc(doc(db, "bookings", booking.id), {
+        seasonalReminderSentAt: new Date().toISOString(),
+      });
+      window.alert(`Seasonal reminder sent to ${booking.email}.`);
+    } catch (error) {
+      console.error(error);
+      window.alert("The seasonal reminder email could not be sent.");
+    } finally {
+      setSendingSeasonalReminder(null);
+    }
+  }
+
   async function remove(id: string) {
     if (!window.confirm("Delete this appointment permanently?")) return;
     try {
@@ -298,13 +376,18 @@ export default function AdminPage() {
         <section className="customer-grid">
           {customerGroups.length === 0 && <article className="empty-state"><h2>No customers yet</h2><p>Customer history will appear after bookings are submitted.</p></article>}
           {customerGroups.map((history) => {
-            const latest = [...history].sort((a, b) => b.date.localeCompare(a.date))[0];
+            const completedHistory = history.filter((item) => item.status === "Completed");
+            const latest = [...(completedHistory.length ? completedHistory : history)].sort((a, b) => b.date.localeCompare(a.date))[0];
             const paidTotal = history.filter((item) => item.paymentStatus === "Paid").reduce((sum, item) => sum + Number(item.price || 0), 0);
+            const reminderDueDate = addMonths(latest.date, 4);
+            const reminderDue = latest.status === "Completed" && reminderDueDate <= today;
+            const seasonalText = encodeURIComponent(`Hi ${latest.name}, this is Russell's Mobile Blade Sharpening. It may be time to have your mower blades sharpened again. Book online at https://www.russellsmobileblade.com/book or call/text 985-295-1163. Thank you!`);
             return <article className="customer-card" key={customerKey(latest)}>
               <div className="booking-card-heading"><div><p className="eyebrow">{history.length} visit{history.length === 1 ? "" : "s"}</p><h2>{latest.name}</h2><p>{latest.city}</p></div><strong>${paidTotal}</strong></div>
+              <div className={`reminder-status ${reminderDue ? "due" : "scheduled"}`}><strong>{reminderDue ? "Seasonal reminder due" : `Next reminder ${formatDate(reminderDueDate)}`}</strong>{latest.seasonalReminderSentAt && <small>Last reminder sent {new Date(latest.seasonalReminderSentAt).toLocaleDateString()}</small>}</div>
               <p><a href={`tel:${latest.phone}`}>{latest.phone}</a>{latest.email && <><br /><a href={`mailto:${latest.email}`}>{latest.email}</a></>}</p>
               <div className="history-list">{history.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).map((item) => <div key={item.id}><span>{formatDate(item.date)}</span><b>{item.serviceName}</b><small>{item.status} · {item.paymentStatus}</small></div>)}</div>
-              <div className="card-actions"><a className="button primary small" href={`tel:${latest.phone}`}>Call</a><a className="button secondary small" href={`sms:${latest.phone}`}>Text</a></div>
+              <div className="card-actions"><a className="button primary small" href={`tel:${latest.phone}`}>Call</a><a className="button secondary small" href={`sms:${latest.phone}?body=${seasonalText}`}>Seasonal text</a>{latest.email && <button className="button secondary small" type="button" disabled={sendingSeasonalReminder === latest.id} onClick={() => sendSeasonalReminder(latest)}>{sendingSeasonalReminder === latest.id ? "Sending reminder..." : "Seasonal email"}</button>}</div>
             </article>;
           })}
         </section>
@@ -321,7 +404,7 @@ export default function AdminPage() {
                 <strong>${booking.price}</strong>
               </div>
               <div className="booking-card-grid"><div><span>Address</span><p>{booking.address}, {booking.city}</p></div><div><span>Contact</span><p><a href={`tel:${booking.phone}`}>{booking.phone}</a>{booking.email && <><br /><a href={`mailto:${booking.email}`}>{booking.email}</a></>}</p></div><div><span>Notes</span><p>{booking.notes || "None"}</p></div></div>
-              <div className="management-row"><label>Status<select value={booking.status} onChange={(e) => update(booking, { status: e.target.value as BookingStatus })}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Payment<select value={booking.paymentStatus} onChange={(e) => update(booking, { paymentStatus: e.target.value as PaymentStatus })}><option>Unpaid</option><option>Paid</option></select></label><label>Method<select value={booking.paymentMethod || ""} onChange={(e) => update(booking, { paymentMethod: e.target.value as Booking["paymentMethod"] })}>{paymentMethods.map((item) => <option key={item} value={item}>{item || "Not selected"}</option>)}</select></label></div>
+              <div className="management-row"><label>Service<select value={booking.jobType || "sharpening"} onChange={(e) => updateBladeService(booking, e.target.value, booking.bladeCount || 1)}><option value="sharpening">Sharpen blades</option><option value="blade-changing">Change blades</option></select></label><label>Blades<select value={booking.bladeCount || 1} onChange={(e) => updateBladeService(booking, booking.jobType || "sharpening", Number(e.target.value))}>{[1, 2, 3, 4, 5, 6].map((count) => <option key={count} value={count}>{count}</option>)}</select></label><label>Status<select value={booking.status} onChange={(e) => update(booking, { status: e.target.value as BookingStatus })}>{statusOptions.map((item) => <option key={item}>{item}</option>)}</select></label><label>Payment<select value={booking.paymentStatus} onChange={(e) => update(booking, { paymentStatus: e.target.value as PaymentStatus })}><option>Unpaid</option><option>Paid</option></select></label><label>Method<select value={booking.paymentMethod || ""} onChange={(e) => update(booking, { paymentMethod: e.target.value as Booking["paymentMethod"] })}>{paymentMethods.map((item) => <option key={item} value={item}>{item || "Not selected"}</option>)}</select></label></div>
               <div className="card-actions"><a className="button primary small" href={`tel:${booking.phone}`}>Call</a><a className="button secondary small" href={`sms:${booking.phone}`}>Text</a>{booking.email && <button className="button secondary small" type="button" disabled={sendingConfirmation === booking.id} onClick={() => sendConfirmation(booking)}>{sendingConfirmation === booking.id ? "Sending email..." : "Send confirmation email"}</button>}<a className="button secondary small" href={`sms:${booking.phone}?body=${onMyWay}`}>I&apos;m on my way</a><a className="button secondary small" href={`sms:${booking.phone}?body=${reviewRequest}`}>Review message</a><a className="button secondary small" target="_blank" rel="noreferrer" href={mapsSearchUrl(booking)}>Directions</a><button className="button danger small" onClick={() => remove(booking.id)}>Delete</button></div>
             </article>;
           })}

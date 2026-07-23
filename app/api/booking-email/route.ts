@@ -15,6 +15,7 @@ type BookingNotification = {
   engineModel?: string;
   serialNumber?: string;
   filterType?: string;
+  bladeSupplier?: string;
   price?: number;
   date?: string;
   time?: string;
@@ -99,6 +100,7 @@ export async function POST(req: Request) {
         ${booking.engineMake ? `<p><strong>Engine:</strong> ${booking.engineMake} ${booking.engineModel || ""}</p>` : ""}
         ${booking.serialNumber ? `<p><strong>Serial number:</strong> ${booking.serialNumber}</p>` : ""}
         ${booking.filterType ? `<p><strong>Filter type:</strong> ${booking.filterType}</p>` : ""}
+        ${booking.bladeSupplier ? `<p><strong>Replacement blades:</strong> ${booking.bladeSupplier}</p>` : ""}
         <p><strong>Total:</strong> $${booking.price || 0}</p>
         <p><strong>Date:</strong> ${booking.date}</p>
         <p><strong>Time:</strong> ${booking.time}</p>

@@ -18,6 +18,7 @@ export type Booking = {
   engineMake?: string;
   engineModel?: string;
   serialNumber?: string;
+  filterType?: string;
   price: number;
   date: string;
   time: string;

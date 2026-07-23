@@ -56,12 +56,22 @@ export default function HomePage() {
           ))}
         </div>
         <article className="blade-change-callout">
-          <div>
+          <div className="blade-change-heading">
             <p className="eyebrow">Additional service</p>
             <h3>Blade changing only</h3>
-            <p><strong>Replacement blades may be customer supplied or provided by Russell for an additional parts charge.</strong> Russell can remove your old blades and install the replacements. Bush Hog blade changes are $25 per blade.</p>
+            <p>Old blades are removed and replacement blades are installed at your location.</p>
           </div>
-          <strong>$10 mower · $25 Bush Hog</strong>
+          <div className="blade-change-rates" aria-label="Blade changing prices">
+            <div><span>Mower blades</span><strong>$10</strong><small>per blade</small></div>
+            <div><span>Bush Hog blades</span><strong>$25</strong><small>per blade</small></div>
+          </div>
+          <div className="blade-change-details">
+            <p><strong>Replacement blade options</strong></p>
+            <ul>
+              <li>Supply your own compatible replacement blades</li>
+              <li>Russell can provide blades for an additional parts charge</li>
+            </ul>
+          </div>
           <Link className="button orange" href="/book">Book blade changing</Link>
         </article>
         <p className="custom-service-caption home-custom-service-caption">

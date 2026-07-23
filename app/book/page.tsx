@@ -403,6 +403,13 @@ export default function BookingPage() {
             </strong>
             .
           </p>
+          {submitted.bladeSupplier === "Russell supplied" && (
+            <p className="parts-arrival-notice">
+              Russell will order the correct replacement blades and let you know
+              when he can perform the service based on the parts arrival date.
+              Your requested date and time are tentative until Russell confirms them.
+            </p>
+          )}
           <p>
             <strong>Date:</strong> {submitted.date}
             <br />
@@ -591,10 +598,17 @@ export default function BookingPage() {
                   />
                   <span>
                     <strong>Russell supplied</strong>
-                    <small>Replacement blades and the parts charge will be confirmed before service.</small>
+                    <small>Russell will confirm the parts cost and service date based on when the replacement blades arrive.</small>
                   </span>
                 </label>
               </div>
+              {bladeSupplier === "Russell supplied" && (
+                <p className="parts-arrival-notice">
+                  Your requested appointment is tentative. Russell will order the
+                  correct blades and contact you with the service date after the
+                  parts arrival date is known.
+                </p>
+              )}
             </fieldset>
           )}
 
@@ -636,8 +650,9 @@ export default function BookingPage() {
             <div>
               <h2>Select a date and time</h2>
               <p>
-                Appointments are available Friday and Saturday. If a time was
-                just reserved, you will be asked to select another slot.
+                {bladeSupplier === "Russell supplied"
+                  ? "Choose your preferred Friday or Saturday. Russell will confirm the final date after the replacement blades arrive."
+                  : "Appointments are available Friday and Saturday. If a time was just reserved, you will be asked to select another slot."}
               </p>
             </div>
           </div>

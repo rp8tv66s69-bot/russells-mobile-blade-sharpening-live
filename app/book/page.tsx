@@ -18,10 +18,10 @@ const mowerTypes = [
 const bladeQuantities = [1, 2, 3, 4, 5, 6];
 const maintenanceAvailableDate = "2026-07-31";
 const maintenancePrices: Record<string, number> = {
-  "push-mower": 55,
-  "riding-mower": 85,
-  "zero-turn": 95,
-  tractor: 125,
+  "push-mower": 45,
+  "riding-mower": 75,
+  "zero-turn": 85,
+  tractor: 115,
 };
 const otherOption = "Other / not listed";
 const equipmentMakes = ["Ariens", "Bad Boy", "Bobcat", "Bush Hog", "Craftsman", "Cub Cadet", "Exmark", "Ferris", "Gravely", "Honda", "Husqvarna", "Hustler", "John Deere", "Kioti", "Kubota", "Mahindra", "Massey Ferguson", "MTD", "Murray", "New Holland", "Poulan Pro", "Ryobi", "Scag", "Snapper", "Spartan", "Toro", "Troy-Bilt", otherOption];

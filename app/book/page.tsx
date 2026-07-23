@@ -24,7 +24,7 @@ const maintenancePrices: Record<string, number> = {
   tractor: 115,
 };
 const otherOption = "Other / not listed";
-const equipmentMakes = ["Ariens", "Bad Boy", "Bobcat", "Bush Hog", "Craftsman", "Cub Cadet", "Exmark", "Ferris", "Gravely", "Honda", "Husqvarna", "Hustler", "John Deere", "Kioti", "Kubota", "Mahindra", "Massey Ferguson", "MTD", "Murray", "New Holland", "Poulan Pro", "Ryobi", "Scag", "Snapper", "Spartan", "Toro", "Troy-Bilt", otherOption];
+const equipmentMakes = ["Ariens", "Bad Boy", "Bobcat", "Bush Hog", "Craftsman", "Cub Cadet", "Dixie Chopper", "Exmark", "Ferris", "Gravely", "Honda", "Husqvarna", "Hustler", "John Deere", "Kioti", "Kubota", "Mahindra", "Massey Ferguson", "MTD", "Murray", "New Holland", "Poulan Pro", "Ryobi", "Scag", "Snapper", "Spartan", "Toro", "Troy-Bilt", otherOption];
 const engineMakes = ["Briggs & Stratton", "Honda", "Kawasaki", "Kohler", "Kubota", "Vanguard", "Yamaha", otherOption];
 const equipmentModels: Record<string, string[]> = {
   Ariens: ["IKON", "EDGE", "APEX", "RAZOR", "CLASSIC"],

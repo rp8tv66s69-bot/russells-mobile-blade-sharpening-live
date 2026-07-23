@@ -22,6 +22,7 @@ service cloud.firestore {
             && request.resource.data.engineMake.size() > 0
             && request.resource.data.engineModel is string
             && request.resource.data.engineModel.size() > 0
+            && request.resource.data.filterType in ["Standard residential", "Commercial canister", "Not sure"]
             && (
               (request.resource.data.serviceId == "push-mower" && request.resource.data.price == 55)
               || (request.resource.data.serviceId == "riding-mower" && request.resource.data.price == 85)

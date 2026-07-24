@@ -74,6 +74,24 @@ export default function HomePage() {
           </div>
           <Link className="button orange" href="/book">Book blade changing</Link>
         </article>
+        <article className="blade-change-callout">
+          <div className="blade-change-heading">
+            <p className="eyebrow">Additional sharpening service</p>
+            <h3>Chainsaw chain sharpening</h3>
+            <p>Pricing is based on the chainsaw bar size. Bring the chain off the saw, or Russell can remove and reinstall it for an additional $10.</p>
+          </div>
+          <div className="blade-change-rates" aria-label="Chainsaw chain sharpening prices">
+            <div><span>Up to 16&quot;</span><strong>$15</strong></div>
+            <div><span>18&quot;–20&quot;</span><strong>$20</strong></div>
+            <div><span>22&quot;–24&quot;</span><strong>$25</strong></div>
+            <div><span>Over 24&quot;</span><strong>$30</strong></div>
+          </div>
+          <div className="blade-change-details">
+            <p><strong>Chain removal and reinstallation</strong></p>
+            <ul><li>Add $10 when the chain is still installed on the saw</li></ul>
+          </div>
+          <Link className="button orange" href="/book">Book chainsaw sharpening</Link>
+        </article>
         <p className="custom-service-caption home-custom-service-caption">
           Need something other than the services listed?{" "}
           <a href="sms:+19852951163">Let me know.</a>

@@ -507,13 +507,21 @@ export default function BookingPage() {
         </p>
       </section>
 
+      <aside className="service-launch-banner" role="status" aria-label="Upcoming service availability">
+        <span>Coming soon</span>
+        <div>
+          <strong>Available beginning July 31, 2026</strong>
+          <p>Basic Maintenance and chainsaw chain sharpening appointments begin on this date.</p>
+        </div>
+      </aside>
+
       <form className="booking-form" onSubmit={handleSubmit}>
         <section className="form-card">
           <div className="form-section-heading">
             <span>1</span>
             <div>
               <h2>Choose your service and equipment</h2>
-              <p>Basic Maintenance appointments begin July 31, 2026. Maintenance prices are labor only; oil, filters, spark plugs, and other parts are additional.</p>
+              <p>Maintenance prices are labor only; oil, filters, spark plugs, and other parts are additional.</p>
             </div>
           </div>
 

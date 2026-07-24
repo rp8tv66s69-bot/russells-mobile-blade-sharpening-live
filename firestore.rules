@@ -45,6 +45,22 @@ service cloud.firestore {
           (request.resource.data.jobType == "sharpening"
             && request.resource.data.serviceId in ["push-mower", "riding-mower", "zero-turn"]
             && request.resource.data.price == request.resource.data.bladeCount * 20)
+          ||
+          (request.resource.data.jobType == "chainsaw-sharpening"
+            && request.resource.data.bladeCount == 0
+            && request.resource.data.chainRemoval is bool
+            && request.resource.data.barSize is string
+            && request.resource.data.barSize.size() > 0
+            && (
+              (request.resource.data.serviceId == "chainsaw-up-to-16"
+                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 25 : 15))
+              || (request.resource.data.serviceId == "chainsaw-18-20"
+                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 30 : 20))
+              || (request.resource.data.serviceId == "chainsaw-22-24"
+                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 35 : 25))
+              || (request.resource.data.serviceId == "chainsaw-over-24"
+                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 40 : 30))
+            ))
         )
         && request.resource.data.city in ["Washington Parish", "St. Tammany Parish", "Tangipahoa Parish"];
       allow read, update, delete: if request.auth != null;

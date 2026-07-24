@@ -19,10 +19,13 @@ const bladeQuantities = [1, 2, 3, 4, 5, 6];
 const chainsawBarSizes = [
   { id: "chainsaw-up-to-16", name: 'Up to 16" bar', price: 15 },
   { id: "chainsaw-18-20", name: '18"–20" bar', price: 20 },
-  { id: "chainsaw-22-24", name: '22"–24" bar', price: 25 },
-  { id: "chainsaw-over-24", name: 'Over 24" bar', price: 30 },
+  { id: "chainsaw-24-28", name: '24"–28" bar', price: 25 },
+  { id: "chainsaw-32-36-plus", name: '32"–36"+ bar', price: 30 },
 ];
-const chainRemovalPrice = 10;
+const chainPitchOptions = ['1/4"', '.325"', '3/8" low profile', '3/8"', '.404"', "Other / not sure"];
+const chainRemovalPrice = 5;
+const minimumServiceCharge = 30;
+const chainsawAvailableDate = "2026-07-31";
 const maintenanceAvailableDate = "2026-07-31";
 const maintenancePrices: Record<string, number> = {
   "push-mower": 45,
@@ -74,6 +77,10 @@ function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
   if (jobType === "blade-changing") return mowerType === "bush-hog" ? 25 : 10;
   return mowerType === "bush-hog" ? 40 : 20;
+}
+
+function withMinimumCharge(price: number) {
+  return price > 0 ? Math.max(minimumServiceCharge, price) : 0;
 }
 
 const times = [
@@ -162,6 +169,7 @@ export default function BookingPage() {
   const [bladeCount, setBladeCount] = useState(0);
   const [bladeSupplier, setBladeSupplier] = useState("");
   const [chainRemoval, setChainRemoval] = useState(false);
+  const [chainPitch, setChainPitch] = useState("");
   const [equipmentMake, setEquipmentMake] = useState("");
   const [equipmentModel, setEquipmentModel] = useState("");
   const [customEquipmentMake, setCustomEquipmentMake] = useState("");
@@ -225,6 +233,7 @@ export default function BookingPage() {
       : mowerTypes.find((service) => service.id === selectedServiceId);
     const selectedBladeCount = Number(form.get("bladeCount") || 0);
     const selectedBladeSupplier = String(form.get("bladeSupplier") || "");
+    const selectedChainPitch = String(form.get("chainPitch") || "").trim();
     const selectedMake = String(form.get("equipmentMake") || "").trim();
     const selectedModel = String(form.get("equipmentModel") || "").trim();
     const selectedEngineMake = String(form.get("engineMake") || "").trim();
@@ -241,6 +250,12 @@ export default function BookingPage() {
 
     if (!selectedService) {
       setError(selectedJobType === "chainsaw-sharpening" ? "Please select the chainsaw bar size." : "Please select a mower type.");
+      setSaving(false);
+      return;
+    }
+
+    if (selectedJobType === "chainsaw-sharpening" && !selectedChainPitch) {
+      setError("Please select the chain pitch.");
       setSaving(false);
       return;
     }
@@ -276,6 +291,12 @@ export default function BookingPage() {
     const date = String(form.get("date") || "");
     const time = String(form.get("time") || "");
 
+    if (selectedJobType === "chainsaw-sharpening" && date < chainsawAvailableDate) {
+      setError("Chainsaw chain sharpening is available beginning July 31, 2026.");
+      setSaving(false);
+      return;
+    }
+
     const booking: Booking = {
       id: slotId(date, time),
       name: String(form.get("name") || "").trim(),
@@ -289,7 +310,7 @@ export default function BookingPage() {
         selectedJobType === "maintenance"
           ? `Basic Maintenance · ${selectedMake} ${selectedModel} · parts additional`
           : selectedJobType === "chainsaw-sharpening"
-            ? `${selectedService.name}${chainRemoval ? " · chain removal and reinstallation included" : " · chain supplied off the saw"}`
+            ? `${selectedService.name} · ${selectedChainPitch} pitch${chainRemoval ? " · chain removal and reinstallation included" : " · chain supplied off the saw"}`
             : `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}${selectedJobType === "blade-changing" ? ` · ${selectedBladeSupplier}` : ""}`,
       jobType: selectedJobType,
       bladeCount: ["maintenance", "chainsaw-sharpening"].includes(selectedJobType) ? 0 : selectedBladeCount,
@@ -298,6 +319,7 @@ export default function BookingPage() {
           ? (selectedBladeSupplier as "Customer supplied" | "Russell supplied")
           : "",
       barSize: selectedJobType === "chainsaw-sharpening" ? selectedService.name : "",
+      chainPitch: selectedJobType === "chainsaw-sharpening" ? selectedChainPitch : "",
       chainRemoval: selectedJobType === "chainsaw-sharpening" ? chainRemoval : false,
       equipmentMake: selectedJobType === "maintenance" ? selectedMake : "",
       equipmentModel: selectedJobType === "maintenance" ? selectedModel : "",
@@ -308,10 +330,10 @@ export default function BookingPage() {
       filterType: selectedJobType === "maintenance" ? selectedFilterType : "",
       price:
         selectedJobType === "maintenance"
-          ? maintenancePrices[selectedService.id]
+          ? withMinimumCharge(maintenancePrices[selectedService.id])
           : selectedJobType === "chainsaw-sharpening"
-            ? (selectedChainsawService?.price || 0) + (chainRemoval ? chainRemovalPrice : 0)
-            : selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id),
+            ? withMinimumCharge((selectedChainsawService?.price || 0) + (chainRemoval ? chainRemovalPrice : 0))
+            : withMinimumCharge(selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id)),
       date,
       time,
       notes: String(form.get("notes") || "").trim(),
@@ -387,6 +409,7 @@ export default function BookingPage() {
       setBladeCount(0);
       setBladeSupplier("");
       setChainRemoval(false);
+      setChainPitch("");
       setEquipmentMake("");
       setEquipmentModel("");
       setCustomEquipmentMake("");
@@ -507,6 +530,9 @@ export default function BookingPage() {
                   setBladeCount(0);
                   setBladeSupplier("");
                   setChainRemoval(false);
+                  setChainPitch("");
+                  setSelectedDate("");
+                  setSelectedTime("");
                 }}
               >
                 <option value="" disabled>Choose a service</option>
@@ -610,10 +636,19 @@ export default function BookingPage() {
           </div>
 
           {isChainsaw && (
-            <label className="chain-removal-option">
-              <input type="checkbox" checked={chainRemoval} onChange={(event) => setChainRemoval(event.target.checked)} />
-              <span><strong>Remove and reinstall chain</strong><small>Add $10 if the chain is still installed on the saw.</small></span>
-            </label>
+            <>
+              <label>
+                <span>Chain pitch *</span>
+                <select name="chainPitch" required value={chainPitch} onChange={(event) => setChainPitch(event.target.value)}>
+                  <option value="" disabled>Select chain pitch</option>
+                  {chainPitchOptions.map((pitch) => <option key={pitch} value={pitch}>{pitch}</option>)}
+                </select>
+              </label>
+              <label className="chain-removal-option">
+                <input type="checkbox" checked={chainRemoval} onChange={(event) => setChainRemoval(event.target.checked)} />
+                <span><strong>Remove and reinstall chain</strong><small>Add $5 if the chain is still installed on the saw.</small></span>
+              </label>
+            </>
           )}
 
           {jobType === "blade-changing" && (
@@ -669,13 +704,13 @@ export default function BookingPage() {
               </>
             ) : isChainsaw ? (
               <>
-                <span>{selectedChainsawSize ? `${selectedChainsawSize.name}${chainRemoval ? " + $10 chain removal" : ""}` : "Select a bar size to see pricing"}</span>
-                <strong>Total: ${(selectedChainsawSize?.price || 0) + (selectedChainsawSize && chainRemoval ? chainRemovalPrice : 0)}</strong>
+                <span>{selectedChainsawSize ? `${selectedChainsawSize.name}${chainRemoval ? " + $5 chain removal" : ""}` : "Select a bar size to see pricing"}</span>
+                <strong>Total: ${withMinimumCharge((selectedChainsawSize?.price || 0) + (selectedChainsawSize && chainRemoval ? chainRemovalPrice : 0))}</strong>
               </>
             ) : (
               <>
                 <span>{bladeCount ? `${bladeCount} × $${currentPricePerBlade} per blade` : jobType ? `$${currentPricePerBlade} per blade` : "Select a service to see pricing"}</span>
-                <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
+                <strong>Total: ${withMinimumCharge(bladeCount * currentPricePerBlade)}</strong>
               </>
             )}
           </div>
@@ -730,13 +765,19 @@ export default function BookingPage() {
                   <option
                     key={dateValue(date)}
                     value={dateValue(date)}
-                    disabled={blockedDates.has(dateValue(date)) || (isMaintenance && dateValue(date) < maintenanceAvailableDate)}
+                    disabled={
+                      blockedDates.has(dateValue(date)) ||
+                      (isMaintenance && dateValue(date) < maintenanceAvailableDate) ||
+                      (isChainsaw && dateValue(date) < chainsawAvailableDate)
+                    }
                   >
                     {formatDate(date)}
                     {blockedDates.has(dateValue(date))
                       ? " (Unavailable)"
                       : isMaintenance && dateValue(date) < maintenanceAvailableDate
                         ? " (Basic Maintenance begins July 31)"
+                        : isChainsaw && dateValue(date) < chainsawAvailableDate
+                          ? " (Chainsaw sharpening begins July 31)"
                         : ""}
                   </option>
                 ))}
@@ -832,7 +873,7 @@ export default function BookingPage() {
         <section className="submit-panel">
           <div>
             <strong>No payment is due online.</strong>
-            <p>Pay after service with Cash, Cash App, or Venmo.</p>
+            <p>$30 minimum mobile-service charge. Pay after service with Cash, Cash App, or Venmo.</p>
           </div>
 
           <button className="button primary" type="submit" disabled={saving}>

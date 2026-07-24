@@ -48,6 +48,7 @@ service cloud.firestore {
           ||
           (request.resource.data.jobType == "chainsaw-sharpening"
             && request.resource.data.bladeCount == 0
+            && request.resource.data.date >= "2026-07-31"
             && request.resource.data.chainRemoval is bool
             && request.resource.data.barSize is string
             && request.resource.data.barSize.size() > 0

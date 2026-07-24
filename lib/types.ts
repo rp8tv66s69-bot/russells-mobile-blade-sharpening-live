@@ -15,6 +15,7 @@ export type Booking = {
   bladeCount?: number;
   bladeSupplier?: "" | "Customer supplied" | "Russell supplied";
   barSize?: string;
+  chainPitch?: string;
   chainRemoval?: boolean;
   equipmentMake?: string;
   equipmentModel?: string;

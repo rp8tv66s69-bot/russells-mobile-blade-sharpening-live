@@ -78,7 +78,7 @@ export default function HomePage() {
           <div className="blade-change-heading">
             <p className="eyebrow">Additional sharpening service</p>
             <h3>Chainsaw chain sharpening</h3>
-            <p>Pricing is based on the chainsaw bar size. Bring the chain off the saw, or Russell can remove and reinstall it for an additional $10.</p>
+            <p>Pricing is based on the chainsaw bar size. Bring the chain off the saw, or Russell can remove and reinstall it for an additional $5.</p>
           </div>
           <div className="blade-change-rates" aria-label="Chainsaw chain sharpening prices">
             <div><span>Up to 16&quot;</span><strong>$15</strong></div>
@@ -88,7 +88,7 @@ export default function HomePage() {
           </div>
           <div className="blade-change-details">
             <p><strong>Chain removal and reinstallation</strong></p>
-            <ul><li>Add $10 when the chain is still installed on the saw</li></ul>
+            <ul><li>Add $5 when the chain is still installed on the saw</li></ul>
           </div>
           <Link className="button orange" href="/book">Book chainsaw sharpening</Link>
         </article>

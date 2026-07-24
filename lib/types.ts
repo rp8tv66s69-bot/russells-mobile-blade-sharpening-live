@@ -14,6 +14,8 @@ export type Booking = {
   jobType?: string;
   bladeCount?: number;
   bladeSupplier?: "" | "Customer supplied" | "Russell supplied";
+  barSize?: string;
+  chainRemoval?: boolean;
   equipmentMake?: string;
   equipmentModel?: string;
   engineMake?: string;

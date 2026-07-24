@@ -255,7 +255,7 @@ export default function BookingPage() {
         return;
       }
       if (!selectedMake || !selectedModel || !selectedEngineMake || !selectedEngineModel || !selectedFilterType) {
-        setError("Please enter the equipment and engine details, including the filter type.");
+        setError("Please enter the equipment and engine details, including the air filter type.");
         setSaving(false);
         return;
       }
@@ -563,9 +563,9 @@ export default function BookingPage() {
                   <input name="serialNumber" value={serialNumber} onChange={(event) => setSerialNumber(event.target.value)} placeholder="Equipment or engine serial number" />
                 </label>
                 <label>
-                  <span>Filter type *</span>
+                  <span>Air filter type *</span>
                   <select name="filterType" required value={filterType} onChange={(event) => setFilterType(event.target.value)}>
-                    <option value="" disabled>Choose filter type</option>
+                    <option value="" disabled>Choose air filter type</option>
                     <option value="Standard residential">Standard residential</option>
                     <option value="Commercial canister">Commercial canister</option>
                     <option value="Not sure">Not sure</option>

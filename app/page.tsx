@@ -47,6 +47,7 @@ export default function HomePage() {
           <p className="eyebrow">Veteran Owned · Straightforward pricing</p>
           <h2>Sharpening services</h2>
           <p className="section-lead">Mower blades are <strong>$20 per blade</strong>, and Bush Hog blades are <strong>$40 per blade.</strong> Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
+          <p className="section-lead"><strong>$30 minimum mobile-service charge applies to every appointment.</strong></p>
         </div>
         <div className="service-grid">
           {services.map(([name, price]) => (

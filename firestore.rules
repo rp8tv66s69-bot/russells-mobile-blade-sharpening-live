@@ -32,19 +32,19 @@ service cloud.firestore {
           ||
           (request.resource.data.jobType == "blade-changing"
             && request.resource.data.serviceId == "bush-hog"
-            && request.resource.data.price == request.resource.data.bladeCount * 25)
+            && request.resource.data.price == (request.resource.data.bladeCount * 25 < 40 ? 40 : request.resource.data.bladeCount * 25))
           ||
           (request.resource.data.jobType == "blade-changing"
             && request.resource.data.serviceId in ["push-mower", "riding-mower", "zero-turn"]
-            && request.resource.data.price == request.resource.data.bladeCount * 10)
+            && request.resource.data.price == (request.resource.data.bladeCount * 10 < 40 ? 40 : request.resource.data.bladeCount * 10))
           ||
           (request.resource.data.jobType == "sharpening"
             && request.resource.data.serviceId == "bush-hog"
-            && request.resource.data.price == request.resource.data.bladeCount * 40)
+            && request.resource.data.price == (request.resource.data.bladeCount * 40 < 40 ? 40 : request.resource.data.bladeCount * 40))
           ||
           (request.resource.data.jobType == "sharpening"
             && request.resource.data.serviceId in ["push-mower", "riding-mower", "zero-turn"]
-            && request.resource.data.price == request.resource.data.bladeCount * 20)
+            && request.resource.data.price == (request.resource.data.bladeCount * 20 < 40 ? 40 : request.resource.data.bladeCount * 20))
           ||
           (request.resource.data.jobType == "chainsaw-sharpening"
             && request.resource.data.bladeCount == 0
@@ -56,13 +56,13 @@ service cloud.firestore {
             && request.resource.data.chainPitch.size() > 0
             && (
               (request.resource.data.serviceId == "chainsaw-up-to-16"
-                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 20 : 15))
+                && request.resource.data.price == 40)
               || (request.resource.data.serviceId == "chainsaw-18-20"
-                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 25 : 20))
+                && request.resource.data.price == 40)
               || (request.resource.data.serviceId == "chainsaw-24-28"
-                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 30 : 25))
+                && request.resource.data.price == 40)
               || (request.resource.data.serviceId == "chainsaw-32-36-plus"
-                && request.resource.data.price == (request.resource.data.chainRemoval == true ? 35 : 30))
+                && request.resource.data.price == 40)
             ))
         )
         && request.resource.data.city in ["Washington Parish", "St. Tammany Parish", "Tangipahoa Parish"];

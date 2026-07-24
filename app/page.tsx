@@ -84,12 +84,15 @@ export default function HomePage() {
           <div className="blade-change-rates" aria-label="Chainsaw chain sharpening prices">
             <div><span>Up to 16&quot;</span><strong>$15</strong></div>
             <div><span>18&quot;–20&quot;</span><strong>$20</strong></div>
-            <div><span>22&quot;–24&quot;</span><strong>$25</strong></div>
-            <div><span>Over 24&quot;</span><strong>$30</strong></div>
+            <div><span>24&quot;–28&quot;</span><strong>$25</strong></div>
+            <div><span>32&quot;–36&quot;+</span><strong>$30</strong></div>
           </div>
           <div className="blade-change-details">
             <p><strong>Chain removal and reinstallation</strong></p>
-            <ul><li>Add $5 when the chain is still installed on the saw</li></ul>
+            <ul>
+              <li>Customers select the chain pitch when booking</li>
+              <li>Add $5 when the chain is still installed on the saw</li>
+            </ul>
           </div>
           <Link className="button orange" href="/book">Book chainsaw sharpening</Link>
         </article>

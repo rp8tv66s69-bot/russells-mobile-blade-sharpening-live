@@ -52,14 +52,16 @@ service cloud.firestore {
             && request.resource.data.chainRemoval is bool
             && request.resource.data.barSize is string
             && request.resource.data.barSize.size() > 0
+            && request.resource.data.chainPitch is string
+            && request.resource.data.chainPitch.size() > 0
             && (
               (request.resource.data.serviceId == "chainsaw-up-to-16"
                 && request.resource.data.price == (request.resource.data.chainRemoval == true ? 20 : 15))
               || (request.resource.data.serviceId == "chainsaw-18-20"
                 && request.resource.data.price == (request.resource.data.chainRemoval == true ? 25 : 20))
-              || (request.resource.data.serviceId == "chainsaw-22-24"
+              || (request.resource.data.serviceId == "chainsaw-24-28"
                 && request.resource.data.price == (request.resource.data.chainRemoval == true ? 30 : 25))
-              || (request.resource.data.serviceId == "chainsaw-over-24"
+              || (request.resource.data.serviceId == "chainsaw-32-36-plus"
                 && request.resource.data.price == (request.resource.data.chainRemoval == true ? 35 : 30))
             ))
         )

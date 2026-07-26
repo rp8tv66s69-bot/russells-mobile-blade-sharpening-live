@@ -70,7 +70,7 @@ function servicePrice(jobType: string, serviceId: string, bladeCount: number) {
     return bladeCount * (serviceId === "bush-hog" ? 25 : 10);
   }
   if (jobType === "loose-blade-sharpening") {
-    return bladeCount * 10;
+    return bladeCount * (serviceId === "loose-bush-hog-blades" ? 20 : 10);
   }
   if (jobType === "chainsaw-sharpening") {
     return ({ "chainsaw-up-to-16": 15, "chainsaw-18-20": 20, "chainsaw-24-28": 25, "chainsaw-32-36-plus": 30 } as Record<string, number>)[serviceId] || 0;

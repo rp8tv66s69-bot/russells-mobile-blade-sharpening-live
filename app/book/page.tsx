@@ -777,7 +777,7 @@ export default function BookingPage() {
               <ul>
                 <li>Mower blades: $10 per blade</li>
                 <li>Bush Hog blades: $20 per blade</li>
-                <li>$30 minimum mobile-service charge applies</li>
+                <li className="minimum-charge-notice"><strong>$30 minimum mobile-service charge applies</strong></li>
               </ul>
             </div>
           ) : jobType === "blade-changing" ? (
@@ -937,7 +937,7 @@ export default function BookingPage() {
         <section className="submit-panel">
           <div>
             <strong>No payment is due online.</strong>
-            <p>$30 minimum mobile-service charge. Pay after service with Cash, Cash App, or Venmo.</p>
+            <p><strong className="minimum-charge-notice">$30 minimum mobile-service charge.</strong> Pay after service with Cash, Cash App, or Venmo.</p>
           </div>
 
           <button className="button primary" type="submit" disabled={saving}>

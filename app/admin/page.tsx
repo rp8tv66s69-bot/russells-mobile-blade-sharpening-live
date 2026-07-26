@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { collection, deleteDoc, doc, onSnapshot, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import type { BlockedSlot, Booking, BookingStatus, PaymentStatus } from "@/lib/types";
+import type { BlockedSlot, Booking, BookingStatus, GalleryPhoto, PaymentStatus } from "@/lib/types";
 
 const statusOptions: BookingStatus[] = ["Pending", "Confirmed", "Completed", "Cancelled"];
 const paymentMethods = ["", "Cash", "Cash App", "Venmo"] as const;
@@ -154,6 +154,51 @@ function routeUrl(bookings: Booking[]) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}${waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : ""}`;
 }
 
+async function compressGalleryImage(file: File) {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please choose an image from your phone.");
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const preview = new Image();
+      preview.onload = () => resolve(preview);
+      preview.onerror = () => reject(new Error("That photo could not be opened."));
+      preview.src = objectUrl;
+    });
+
+    const maxDimension = 1100;
+    const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Your browser could not prepare the photo.");
+
+    context.drawImage(image, 0, 0, width, height);
+
+    let quality = 0.76;
+    let dataUrl = canvas.toDataURL("image/jpeg", quality);
+    while (dataUrl.length > 360000 && quality > 0.42) {
+      quality -= 0.08;
+      dataUrl = canvas.toDataURL("image/jpeg", quality);
+    }
+
+    if (dataUrl.length > 420000) {
+      throw new Error("That photo is still too large. Please crop it and try again.");
+    }
+
+    return dataUrl;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -181,6 +226,12 @@ export default function AdminPage() {
   const [partsEngineHorsepower, setPartsEngineHorsepower] = useState("");
   const [partsSerialNumber, setPartsSerialNumber] = useState("");
   const [partsFilterType, setPartsFilterType] = useState("Not sure");
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+  const [beforePhoto, setBeforePhoto] = useState<File | null>(null);
+  const [afterPhoto, setAfterPhoto] = useState<File | null>(null);
+  const [photoCaption, setPhotoCaption] = useState("");
+  const [savingPhotos, setSavingPhotos] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState("");
 
   const equipmentMakeValue = partsEquipmentMake === otherOption ? customEquipmentMake.trim() : partsEquipmentMake;
   const equipmentModelValue = partsEquipmentModel === otherOption ? customEquipmentModel.trim() : partsEquipmentModel;
@@ -221,6 +272,20 @@ export default function AdminPage() {
         console.error(error);
         setDataError("Appointments could not be loaded. Check your Firestore rules and internet connection.");
       },
+    );
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    return onSnapshot(
+      query(collection(db, "gallery"), orderBy("createdAt", "desc")),
+      (snapshot) => setGalleryPhotos(
+        snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as GalleryPhoto))
+      ),
+      (error) => {
+        console.error("Gallery photos could not be loaded:", error);
+        setPhotoMessage("Gallery photos could not be loaded.");
+      }
     );
   }, [user]);
 
@@ -445,6 +510,65 @@ export default function AdminPage() {
     }
   }
 
+  async function addGalleryPhotos(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!beforePhoto || !afterPhoto) {
+      setPhotoMessage("Choose both a before photo and an after photo.");
+      return;
+    }
+
+    const form = event.currentTarget;
+    setSavingPhotos(true);
+    setPhotoMessage("Preparing your photos...");
+
+    try {
+      const [beforeImage, afterImage] = await Promise.all([
+        compressGalleryImage(beforePhoto),
+        compressGalleryImage(afterPhoto),
+      ]);
+
+      const photoRef = doc(collection(db, "gallery"));
+      await setDoc(photoRef, {
+        beforeImage,
+        afterImage,
+        caption: photoCaption.trim(),
+        createdAt: new Date().toISOString(),
+      });
+
+      setBeforePhoto(null);
+      setAfterPhoto(null);
+      setPhotoCaption("");
+      form.reset();
+      setPhotoMessage("Photos published to your homepage.");
+    } catch (error) {
+      console.error(error);
+      setPhotoMessage(error instanceof Error ? error.message : "The photos could not be published.");
+    } finally {
+      setSavingPhotos(false);
+    }
+  }
+
+  async function removeGalleryPhoto(id: string) {
+    if (!window.confirm("Remove this before-and-after photo pair from your website?")) return;
+    try {
+      await deleteDoc(doc(db, "gallery", id));
+      setPhotoMessage("Photo pair removed.");
+    } catch (error) {
+      console.error(error);
+      setPhotoMessage("The photo pair could not be removed.");
+    }
+  }
+
+  async function moveGalleryPhotoToTop(id: string) {
+    try {
+      await updateDoc(doc(db, "gallery", id), { createdAt: new Date().toISOString() });
+      setPhotoMessage("Photo pair moved to the top of the gallery.");
+    } catch (error) {
+      console.error(error);
+      setPhotoMessage("The photo pair could not be reordered.");
+    }
+  }
+
   if (authLoading || !user) return <main className="admin-shell"><p>Checking owner access...</p></main>;
 
   return (
@@ -475,6 +599,64 @@ export default function AdminPage() {
           <p className="muted">Open today&apos;s appointments as a multi-stop route in Google Maps.</p>
         </div>
         <a className={`button primary ${todayBookings.length ? "" : "disabled-link"}`} target="_blank" rel="noreferrer" href={routeUrl(todayBookings)}>Open today&apos;s route</a>
+      </section>
+
+      <section className="photo-manager">
+        <p className="eyebrow">Website photos</p>
+        <h2>Before &amp; after gallery</h2>
+        <p className="muted">Choose two photos from your phone. They will be resized automatically and published together on your homepage.</p>
+
+        <form className="photo-upload-form" onSubmit={addGalleryPhotos}>
+          <label>
+            Before photo *
+            <input
+              type="file"
+              accept="image/*"
+              required
+              onChange={(event) => setBeforePhoto(event.target.files?.[0] || null)}
+            />
+          </label>
+          <label>
+            After photo *
+            <input
+              type="file"
+              accept="image/*"
+              required
+              onChange={(event) => setAfterPhoto(event.target.files?.[0] || null)}
+            />
+          </label>
+          <label className="photo-caption-field">
+            Caption (optional)
+            <input
+              value={photoCaption}
+              onChange={(event) => setPhotoCaption(event.target.value)}
+              placeholder="Example: Three zero-turn blades sharpened and balanced"
+              maxLength={120}
+            />
+          </label>
+          <button className="button primary" disabled={savingPhotos}>
+            {savingPhotos ? "Publishing photos..." : "Publish photos"}
+          </button>
+        </form>
+
+        {photoMessage && <p className="photo-message" role="status">{photoMessage}</p>}
+
+        <div className="admin-photo-grid">
+          {galleryPhotos.length === 0 && <p className="muted">No customer photo pairs have been published yet.</p>}
+          {galleryPhotos.map((photo) => (
+            <article key={photo.id}>
+              <div>
+                <img src={photo.beforeImage} alt="Before sharpening" />
+                <img src={photo.afterImage} alt="After sharpening" />
+              </div>
+              <p>{photo.caption || "Before and after sharpening"}</p>
+              <div className="card-actions">
+                <button className="button secondary small" type="button" onClick={() => moveGalleryPhotoToTop(photo.id)}>Move to top</button>
+                <button className="button danger small" type="button" onClick={() => removeGalleryPhoto(photo.id)}>Delete</button>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="availability-panel">

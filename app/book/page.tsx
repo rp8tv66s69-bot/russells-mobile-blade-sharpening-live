@@ -203,6 +203,14 @@ export default function BookingPage() {
   const availableEngineModels = engineMake ? [...(engineModels[engineMake] || []), otherOption] : [];
 
   useEffect(() => {
+    const requestedJobType = new URLSearchParams(window.location.search).get("jobType");
+
+    if (requestedJobType === "loose-blade-sharpening") {
+      setJobType(requestedJobType);
+    }
+  }, []);
+
+  useEffect(() => {
     return onSnapshot(
       collection(db, "blockedSlots"),
       (snapshot) => {

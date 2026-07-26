@@ -64,7 +64,7 @@ type PartsLookupDetails = {
 
 function servicePrice(jobType: string, serviceId: string, bladeCount: number) {
   if (jobType === "maintenance") {
-    return ({ "push-mower": 35, "riding-mower": 65, "zero-turn": 75, tractor: 105 } as Record<string, number>)[serviceId] || 0;
+    return ({ "push-mower": 35, "riding-mower": 45, "zero-turn": 45, tractor: 80 } as Record<string, number>)[serviceId] || 0;
   }
   if (jobType === "blade-changing") {
     return bladeCount * (serviceId === "bush-hog" ? 25 : 10);

@@ -83,7 +83,9 @@ function pricePerBlade(jobType: string, mowerType: string) {
     return mowerType === "loose-bush-hog-blades" ? 20 : 10;
   }
   if (jobType === "blade-changing") return mowerType === "bush-hog" ? 25 : 10;
-  return mowerType === "bush-hog" ? 40 : 20;
+  if (mowerType === "bush-hog") return 40;
+  if (mowerType === "zero-turn") return 20;
+  return 10;
 }
 
 function withMinimumCharge(price: number) {

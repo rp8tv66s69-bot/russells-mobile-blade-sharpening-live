@@ -12,9 +12,9 @@ const services = [
 
 const maintenanceServices = [
   ["Push Mower", "$35 + parts"],
-  ["Riding Mower", "$65 + parts"],
-  ["Zero Turn", "$75 + parts"],
-  ["Tractor", "From $105 + parts"],
+  ["Riding Mower", "$45 + parts"],
+  ["Zero Turn", "$45 + parts"],
+  ["Tractor", "$80 + parts"],
 ];
 
 export default function HomePage() {

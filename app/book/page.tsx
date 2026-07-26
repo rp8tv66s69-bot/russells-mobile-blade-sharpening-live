@@ -204,8 +204,15 @@ export default function BookingPage() {
 
   useEffect(() => {
     const requestedJobType = new URLSearchParams(window.location.search).get("jobType");
+    const supportedJobTypes = [
+      "sharpening",
+      "loose-blade-sharpening",
+      "blade-changing",
+      "chainsaw-sharpening",
+      "maintenance",
+    ];
 
-    if (requestedJobType === "loose-blade-sharpening") {
+    if (requestedJobType && supportedJobTypes.includes(requestedJobType)) {
       setJobType(requestedJobType);
     }
   }, []);

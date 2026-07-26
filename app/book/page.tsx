@@ -29,9 +29,9 @@ const chainsawAvailableDate = "2026-07-31";
 const maintenanceAvailableDate = "2026-07-31";
 const maintenancePrices: Record<string, number> = {
   "push-mower": 35,
-  "riding-mower": 65,
-  "zero-turn": 75,
-  tractor: 105,
+  "riding-mower": 45,
+  "zero-turn": 45,
+  tractor: 80,
 };
 const otherOption = "Other / not listed";
 const equipmentMakes = ["Ariens", "Bad Boy", "Bobcat", "Bush Hog", "Craftsman", "Cub Cadet", "Dixie Chopper", "Exmark", "Ferris", "Gravely", "Honda", "Husqvarna", "Hustler", "John Deere", "Kioti", "Kubota", "Mahindra", "Massey Ferguson", "MTD", "Murray", "New Holland", "Poulan Pro", "Ryobi", "Scag", "Snapper", "Spartan", "Toro", "Troy-Bilt", otherOption];

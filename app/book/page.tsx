@@ -75,6 +75,7 @@ const engineModels: Record<string, string[]> = {
 
 function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
+  if (jobType === "loose-blade-sharpening") return 10;
   if (jobType === "blade-changing") return mowerType === "bush-hog" ? 25 : 10;
   return mowerType === "bush-hog" ? 40 : 20;
 }
@@ -184,6 +185,7 @@ export default function BookingPage() {
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const isMaintenance = jobType === "maintenance";
   const isChainsaw = jobType === "chainsaw-sharpening";
+  const isLooseBlades = jobType === "loose-blade-sharpening";
   const selectedChainsawSize = chainsawBarSizes.find((size) => size.id === selectedMowerType);
   const currentPricePerBlade = pricePerBlade(jobType, selectedMowerType);
   const maintenanceLaborPrice = maintenancePrices[selectedMowerType] || 0;
@@ -230,7 +232,9 @@ export default function BookingPage() {
     const selectedChainsawService = chainsawBarSizes.find((service) => service.id === selectedServiceId);
     const selectedService = selectedJobType === "chainsaw-sharpening"
       ? selectedChainsawService
-      : mowerTypes.find((service) => service.id === selectedServiceId);
+      : selectedJobType === "loose-blade-sharpening"
+        ? { id: "loose-blades", name: "Loose or Spare Blades" }
+        : mowerTypes.find((service) => service.id === selectedServiceId);
     const selectedBladeCount = Number(form.get("bladeCount") || 0);
     const selectedBladeSupplier = String(form.get("bladeSupplier") || "");
     const selectedChainPitch = String(form.get("chainPitch") || "").trim();
@@ -242,7 +246,7 @@ export default function BookingPage() {
     const selectedSerialNumber = String(form.get("serialNumber") || "").trim();
     const selectedFilterType = String(form.get("filterType") || "");
 
-    if (!["sharpening", "blade-changing", "maintenance", "chainsaw-sharpening"].includes(selectedJobType)) {
+    if (!["sharpening", "loose-blade-sharpening", "blade-changing", "maintenance", "chainsaw-sharpening"].includes(selectedJobType)) {
       setError("Please select a service.");
       setSaving(false);
       return;
@@ -305,13 +309,15 @@ export default function BookingPage() {
       address: String(form.get("address") || "").trim(),
       city: String(form.get("city") || "").trim(),
       serviceId: selectedService.id,
-      serviceName: selectedJobType === "chainsaw-sharpening" ? "Chainsaw Chain Sharpening" : selectedService.name,
+      serviceName: selectedJobType === "chainsaw-sharpening"
+        ? "Chainsaw Chain Sharpening"
+        : selectedService.name,
       serviceDetail:
         selectedJobType === "maintenance"
           ? `Basic Maintenance · ${selectedMake} ${selectedModel} · parts additional`
           : selectedJobType === "chainsaw-sharpening"
             ? `${selectedService.name} · ${selectedChainPitch} pitch${chainRemoval ? " · chain removal and reinstallation included" : " · chain supplied off the saw"}`
-            : `${selectedJobType === "blade-changing" ? "Blade changing only" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}${selectedJobType === "blade-changing" ? ` · ${selectedBladeSupplier}` : ""}`,
+            : `${selectedJobType === "blade-changing" ? "Blade changing only" : selectedJobType === "loose-blade-sharpening" ? "Loose/spare blade sharpening" : "Blade sharpening"} · ${selectedBladeCount} ${selectedBladeCount === 1 ? "blade" : "blades"}${selectedJobType === "blade-changing" ? ` · ${selectedBladeSupplier}` : ""}`,
       jobType: selectedJobType,
       bladeCount: ["maintenance", "chainsaw-sharpening"].includes(selectedJobType) ? 0 : selectedBladeCount,
       bladeSupplier:
@@ -545,31 +551,36 @@ export default function BookingPage() {
               >
                 <option value="" disabled>Choose a service</option>
                 <option value="sharpening">Blade sharpening</option>
+                <option value="loose-blade-sharpening">Loose or spare blade sharpening</option>
                 <option value="blade-changing">Blade changing only</option>
                 <option value="chainsaw-sharpening">Chainsaw chain sharpening</option>
                 <option value="maintenance">Basic Maintenance</option>
               </select>
             </label>
 
-            <label>
-              <span>{isChainsaw ? "Chainsaw bar size *" : "Mower type *"}</span>
-              <select
-                name="service"
-                required
-                value={selectedMowerType}
-                onChange={(event) => setSelectedMowerType(event.target.value)}
-              >
-                <option value="" disabled>Choose equipment type</option>
-                {(isChainsaw
-                  ? chainsawBarSizes
-                  : mowerTypes.filter((mower) =>
-                    isMaintenance ? mower.id !== "bush-hog" : mower.id !== "tractor"
-                  )
-                ).map((service) => (
-                  <option key={service.id} value={service.id}>{service.name}</option>
-                ))}
-              </select>
-            </label>
+            {isLooseBlades ? (
+              <input type="hidden" name="service" value="loose-blades" />
+            ) : (
+              <label>
+                <span>{isChainsaw ? "Chainsaw bar size *" : "Mower type *"}</span>
+                <select
+                  name="service"
+                  required
+                  value={selectedMowerType}
+                  onChange={(event) => setSelectedMowerType(event.target.value)}
+                >
+                  <option value="" disabled>Choose equipment type</option>
+                  {(isChainsaw
+                    ? chainsawBarSizes
+                    : mowerTypes.filter((mower) =>
+                      isMaintenance ? mower.id !== "bush-hog" : mower.id !== "tractor"
+                    )
+                  ).map((service) => (
+                    <option key={service.id} value={service.id}>{service.name}</option>
+                  ))}
+                </select>
+              </label>
+            )}
 
             {isMaintenance ? (
               <>
@@ -724,6 +735,15 @@ export default function BookingPage() {
           </div>
           {isMaintenance ? (
             <p className="custom-service-caption">Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
+          ) : isLooseBlades ? (
+            <div className="blade-changing-booking-summary">
+              <strong>Loose or spare blades</strong>
+              <span>Blades must already be removed from the equipment.</span>
+              <ul>
+                <li>$10 per blade</li>
+                <li>$30 minimum mobile-service charge applies</li>
+              </ul>
+            </div>
           ) : jobType === "blade-changing" ? (
             <div className="blade-changing-booking-summary">
               <strong>Blade changing only</strong>

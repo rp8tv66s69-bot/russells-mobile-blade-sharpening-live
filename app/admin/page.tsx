@@ -171,7 +171,7 @@ async function compressGalleryImage(file: File) {
       preview.src = objectUrl;
     });
 
-    const maxDimension = 1100;
+    const maxDimension = 900;
     const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
     const width = Math.max(1, Math.round(image.naturalWidth * scale));
     const height = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -184,14 +184,14 @@ async function compressGalleryImage(file: File) {
 
     context.drawImage(image, 0, 0, width, height);
 
-    let quality = 0.76;
+    let quality = 0.72;
     let dataUrl = canvas.toDataURL("image/jpeg", quality);
-    while (dataUrl.length > 360000 && quality > 0.42) {
+    while (dataUrl.length > 240000 && quality > 0.38) {
       quality -= 0.08;
       dataUrl = canvas.toDataURL("image/jpeg", quality);
     }
 
-    if (dataUrl.length > 420000) {
+    if (dataUrl.length > 300000) {
       throw new Error("That photo is still too large. Please crop it and try again.");
     }
 

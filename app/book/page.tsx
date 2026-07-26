@@ -16,6 +16,10 @@ const mowerTypes = [
 ];
 
 const bladeQuantities = [1, 2, 3, 4, 5, 6];
+const looseBladeTypes = [
+  { id: "loose-blades", name: "Mower blade", price: 10 },
+  { id: "loose-bush-hog-blades", name: "Bush Hog blade", price: 20 },
+];
 const chainsawBarSizes = [
   { id: "chainsaw-up-to-16", name: 'Up to 16" bar', price: 15 },
   { id: "chainsaw-18-20", name: '18"–20" bar', price: 20 },
@@ -75,7 +79,9 @@ const engineModels: Record<string, string[]> = {
 
 function pricePerBlade(jobType: string, mowerType: string) {
   if (!jobType) return 0;
-  if (jobType === "loose-blade-sharpening") return 10;
+  if (jobType === "loose-blade-sharpening") {
+    return mowerType === "loose-bush-hog-blades" ? 20 : 10;
+  }
   if (jobType === "blade-changing") return mowerType === "bush-hog" ? 25 : 10;
   return mowerType === "bush-hog" ? 40 : 20;
 }
@@ -233,7 +239,7 @@ export default function BookingPage() {
     const selectedService = selectedJobType === "chainsaw-sharpening"
       ? selectedChainsawService
       : selectedJobType === "loose-blade-sharpening"
-        ? { id: "loose-blades", name: "Loose or Spare Blades" }
+        ? looseBladeTypes.find((service) => service.id === selectedServiceId)
         : mowerTypes.find((service) => service.id === selectedServiceId);
     const selectedBladeCount = Number(form.get("bladeCount") || 0);
     const selectedBladeSupplier = String(form.get("bladeSupplier") || "");
@@ -253,7 +259,13 @@ export default function BookingPage() {
     }
 
     if (!selectedService) {
-      setError(selectedJobType === "chainsaw-sharpening" ? "Please select the chainsaw bar size." : "Please select a mower type.");
+      setError(
+        selectedJobType === "chainsaw-sharpening"
+          ? "Please select the chainsaw bar size."
+          : selectedJobType === "loose-blade-sharpening"
+            ? "Please select the loose blade type."
+            : "Please select a mower type."
+      );
       setSaving(false);
       return;
     }
@@ -559,7 +571,22 @@ export default function BookingPage() {
             </label>
 
             {isLooseBlades ? (
-              <input type="hidden" name="service" value="loose-blades" />
+              <label>
+                <span>Loose blade type *</span>
+                <select
+                  name="service"
+                  required
+                  value={selectedMowerType}
+                  onChange={(event) => setSelectedMowerType(event.target.value)}
+                >
+                  <option value="" disabled>Choose blade type</option>
+                  {looseBladeTypes.map((service) => (
+                    <option key={service.id} value={service.id}>
+                      {service.name} — ${service.price} per blade
+                    </option>
+                  ))}
+                </select>
+              </label>
             ) : (
               <label>
                 <span>{isChainsaw ? "Chainsaw bar size *" : "Mower type *"}</span>
@@ -740,7 +767,8 @@ export default function BookingPage() {
               <strong>Loose or spare blades</strong>
               <span>Blades must already be removed from the equipment.</span>
               <ul>
-                <li>$10 per blade</li>
+                <li>Mower blades: $10 per blade</li>
+                <li>Bush Hog blades: $20 per blade</li>
                 <li>$30 minimum mobile-service charge applies</li>
               </ul>
             </div>

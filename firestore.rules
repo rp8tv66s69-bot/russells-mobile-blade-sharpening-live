@@ -51,7 +51,11 @@ service cloud.firestore {
             && request.resource.data.price == (request.resource.data.bladeCount * 40 < 30 ? 30 : request.resource.data.bladeCount * 40))
           ||
           (request.resource.data.jobType == "sharpening"
-            && request.resource.data.serviceId in ["push-mower", "riding-mower", "zero-turn"]
+            && request.resource.data.serviceId in ["push-mower", "riding-mower"]
+            && request.resource.data.price == (request.resource.data.bladeCount * 10 < 30 ? 30 : request.resource.data.bladeCount * 10))
+          ||
+          (request.resource.data.jobType == "sharpening"
+            && request.resource.data.serviceId == "zero-turn"
             && request.resource.data.price == (request.resource.data.bladeCount * 20 < 30 ? 30 : request.resource.data.bladeCount * 20))
           ||
           (request.resource.data.jobType == "chainsaw-sharpening"

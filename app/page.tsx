@@ -70,7 +70,7 @@ export default function HomePage() {
             <p><strong>Please have blades removed before the appointment.</strong></p>
             <p>The $30 minimum mobile-service charge applies to each appointment.</p>
           </div>
-          <Link className="button orange" href="/book">Book loose blade sharpening</Link>
+          <Link className="button orange" href="/book?jobType=loose-blade-sharpening">Book loose blade sharpening</Link>
         </article>
         <article className="blade-change-callout">
           <div className="blade-change-heading">

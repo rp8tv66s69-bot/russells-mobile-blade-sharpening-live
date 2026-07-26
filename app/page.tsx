@@ -60,10 +60,11 @@ export default function HomePage() {
           <div className="blade-change-heading">
             <p className="eyebrow">Bring extra blades</p>
             <h3>Loose or spare blade sharpening</h3>
-            <p>Blades that are already removed from the equipment can be sharpened for <strong>$10 per blade.</strong></p>
+            <p>Blades that are already removed from the equipment can be sharpened at a reduced price.</p>
           </div>
           <div className="blade-change-rates" aria-label="Loose blade sharpening price">
-            <div><span>Loose or spare blades</span><strong>$10</strong><small>per blade</small></div>
+            <div><span>Mower blades</span><strong>$10</strong><small>per blade</small></div>
+            <div><span>Bush Hog blades</span><strong>$20</strong><small>per blade</small></div>
           </div>
           <div className="blade-change-details">
             <p><strong>Please have blades removed before the appointment.</strong></p>

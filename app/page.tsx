@@ -89,7 +89,7 @@ export default function HomePage() {
               <li>Russell can provide blades at the parts cost plus a 15% sourcing and handling charge ($10 minimum)</li>
             </ul>
           </div>
-          <Link className="button orange" href="/book">Book blade changing</Link>
+          <Link className="button orange" href="/book?jobType=blade-changing">Book blade changing</Link>
         </article>
         <article className="blade-change-callout">
           <div className="blade-change-heading">
@@ -111,7 +111,7 @@ export default function HomePage() {
               <li>Add $5 when the chain is still installed on the saw</li>
             </ul>
           </div>
-          <Link className="button orange" href="/book">Book chainsaw sharpening</Link>
+          <Link className="button orange" href="/book?jobType=chainsaw-sharpening">Book chainsaw sharpening</Link>
         </article>
         <p className="custom-service-caption home-custom-service-caption">
           Need something other than the services listed?{" "}
@@ -138,7 +138,7 @@ export default function HomePage() {
           <strong>Appointments begin Friday, July 31, 2026.</strong>
           <p>Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customers may provide compatible parts; customer-supplied parts are not covered by a parts warranty.</p>
           <p>Please provide the equipment make and model when booking. Additional repairs require customer approval.</p>
-          <Link className="button orange" href="/book">Request Basic Maintenance</Link>
+          <Link className="button orange" href="/book?jobType=maintenance">Request Basic Maintenance</Link>
         </div>
       </section>
 

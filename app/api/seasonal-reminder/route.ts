@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       from: "Russell's Mobile Blade Sharpening <bookings@russellsmobileblade.com>",
       to: [customer.email],
       replyTo: "russellsmobileblade@gmail.com",
-      subject: "Ready for another clean cut?",
+      subject: "Your annual blade sharpening reminder",
       html: `
         <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#101713;line-height:1.6">
           <div style="background:#0b4d22;color:#fff;padding:24px;border-radius:14px 14px 0 0">
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
           </div>
           <div style="border:1px solid #d9ded8;border-top:0;padding:26px;border-radius:0 0 14px 14px">
             <p>Hi ${safeName},</p>
-            <p>It may be time to have your mower blades sharpened again. Sharp blades give grass a cleaner cut and help your lawn look its best.</p>
+            <p>It has been about a year since your last service and may be time to have your mower blades sharpened again. Sharp blades give grass a cleaner cut and help your lawn look its best.</p>
             <p>Your last recorded service was <strong>${safeService}</strong> on <strong>${safeDate}</strong>.</p>
             <p><a href="https://www.russellsmobileblade.com/book" style="display:inline-block;background:#167331;color:#fff;text-decoration:none;font-weight:700;padding:13px 20px;border-radius:10px">Book your next sharpening</a></p>
             <p>You can also call or text <a href="tel:+19852951163" style="color:#167331;font-weight:700">985-295-1163</a>.</p>
@@ -91,15 +91,15 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      console.error("Seasonal reminder email failed:", error);
+      console.error("Annual reminder email failed:", error);
       return NextResponse.json({ error }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("Unable to send seasonal reminder:", error);
+    console.error("Unable to send annual reminder:", error);
     return NextResponse.json(
-      { error: "Unable to send seasonal reminder." },
+      { error: "Unable to send annual reminder." },
       { status: 500 }
     );
   }

@@ -560,14 +560,6 @@ export default function BookingPage() {
         </p>
       </section>
 
-      <aside className="service-launch-banner" role="status" aria-label="Upcoming service availability">
-        <span>Coming soon</span>
-        <div>
-          <strong>Available beginning July 31, 2026</strong>
-          <p>Basic Maintenance and chainsaw chain sharpening appointments begin on this date.</p>
-        </div>
-      </aside>
-
       <form className="booking-form" onSubmit={handleSubmit}>
         <section className="form-card">
           <div className="form-section-heading">

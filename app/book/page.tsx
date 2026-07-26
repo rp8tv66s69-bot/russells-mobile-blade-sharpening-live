@@ -205,7 +205,9 @@ export default function BookingPage() {
   const availableEngineModels = engineMake ? [...(engineModels[engineMake] || []), otherOption] : [];
 
   useEffect(() => {
-    const requestedJobType = new URLSearchParams(window.location.search).get("jobType");
+    const searchParams = new URLSearchParams(window.location.search);
+    const requestedJobType = searchParams.get("jobType");
+    const requestedService = searchParams.get("service");
     const supportedJobTypes = [
       "sharpening",
       "loose-blade-sharpening",
@@ -216,6 +218,22 @@ export default function BookingPage() {
 
     if (requestedJobType && supportedJobTypes.includes(requestedJobType)) {
       setJobType(requestedJobType);
+
+      const allowedServices = requestedJobType === "loose-blade-sharpening"
+        ? looseBladeTypes.map((service) => service.id)
+        : requestedJobType === "chainsaw-sharpening"
+          ? chainsawBarSizes.map((service) => service.id)
+          : mowerTypes
+            .filter((mower) =>
+              requestedJobType === "maintenance"
+                ? mower.id !== "bush-hog"
+                : mower.id !== "tractor"
+            )
+            .map((mower) => mower.id);
+
+      if (requestedService && allowedServices.includes(requestedService)) {
+        setSelectedMowerType(requestedService);
+      }
     }
   }, []);
 

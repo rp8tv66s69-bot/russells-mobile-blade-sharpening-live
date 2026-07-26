@@ -4,10 +4,10 @@ import SiteHeader from "@/components/SiteHeader";
 import BeforeAfterGallery from "@/components/BeforeAfterGallery";
 
 const services = [
-  ["Push Mower", "$10/blade"],
-  ["Riding Mower", "$10/blade"],
-  ["Zero Turn", "$20/blade"],
-  ["Bush Hog", "$40/blade"],
+  ["push-mower", "Push Mower", "$10/blade"],
+  ["riding-mower", "Riding Mower", "$10/blade"],
+  ["zero-turn", "Zero Turn", "$20/blade"],
+  ["bush-hog", "Bush Hog", "$40/blade"],
 ];
 
 const maintenanceServices = [
@@ -50,10 +50,15 @@ export default function HomePage() {
           <p className="section-lead minimum-charge-notice"><strong>$30 minimum mobile-service charge applies to every appointment.</strong></p>
         </div>
         <div className="service-grid">
-          {services.map(([name, price]) => (
-            <article className="service-card" key={name}>
-              <div><h3>{name}</h3><p>Choose your number of blades</p></div><strong>{price}</strong>
-            </article>
+          {services.map(([id, name, price]) => (
+            <Link
+              className="service-card service-card-link"
+              href={`/book?jobType=sharpening&service=${id}`}
+              key={id}
+              aria-label={`Book ${name} blade sharpening`}
+            >
+              <div><h3>{name}</h3><p>Choose your number of blades · Tap to book</p></div><strong>{price}</strong>
+            </Link>
           ))}
         </div>
         <article className="blade-change-callout">

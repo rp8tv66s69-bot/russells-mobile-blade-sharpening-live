@@ -58,6 +58,21 @@ export default function HomePage() {
         </div>
         <article className="blade-change-callout">
           <div className="blade-change-heading">
+            <p className="eyebrow">Bring extra blades</p>
+            <h3>Loose or spare blade sharpening</h3>
+            <p>Blades that are already removed from the equipment can be sharpened for <strong>$10 per blade.</strong></p>
+          </div>
+          <div className="blade-change-rates" aria-label="Loose blade sharpening price">
+            <div><span>Loose or spare blades</span><strong>$10</strong><small>per blade</small></div>
+          </div>
+          <div className="blade-change-details">
+            <p><strong>Please have blades removed before the appointment.</strong></p>
+            <p>The $30 minimum mobile-service charge applies to each appointment.</p>
+          </div>
+          <Link className="button orange" href="/book">Book loose blade sharpening</Link>
+        </article>
+        <article className="blade-change-callout">
+          <div className="blade-change-heading">
             <p className="eyebrow">Additional service</p>
             <h3>Blade changing only</h3>
             <p>Old blades are removed and replacement blades are installed at your location.</p>

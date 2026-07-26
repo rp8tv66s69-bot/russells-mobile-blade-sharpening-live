@@ -456,17 +456,17 @@ export default function AdminPage() {
 
       if (!response.ok) {
         console.error("Seasonal reminder failed:", await response.text());
-        window.alert("The seasonal reminder email could not be sent.");
+        window.alert("The annual reminder email could not be sent.");
         return;
       }
 
       await updateDoc(doc(db, "bookings", booking.id), {
         seasonalReminderSentAt: new Date().toISOString(),
       });
-      window.alert(`Seasonal reminder sent to ${booking.email}.`);
+      window.alert(`Annual reminder sent to ${booking.email}.`);
     } catch (error) {
       console.error(error);
-      window.alert("The seasonal reminder email could not be sent.");
+      window.alert("The annual reminder email could not be sent.");
     } finally {
       setSendingSeasonalReminder(null);
     }
@@ -726,15 +726,15 @@ export default function AdminPage() {
             const completedHistory = history.filter((item) => item.status === "Completed");
             const latest = [...(completedHistory.length ? completedHistory : history)].sort((a, b) => b.date.localeCompare(a.date))[0];
             const paidTotal = history.filter((item) => item.paymentStatus === "Paid").reduce((sum, item) => sum + Number(item.price || 0), 0);
-            const reminderDueDate = addMonths(latest.date, 4);
+            const reminderDueDate = addMonths(latest.date, 12);
             const reminderDue = latest.status === "Completed" && reminderDueDate <= today;
-            const seasonalText = encodeURIComponent(`Hi ${latest.name}, this is Russell's Mobile Blade Sharpening. It may be time to have your mower blades sharpened again. Book online at https://www.russellsmobileblade.com/book or call/text 985-295-1163. Thank you!`);
+            const seasonalText = encodeURIComponent(`Hi ${latest.name}, this is Russell's Mobile Blade Sharpening. It has been about a year since your last service and may be time to have your mower blades sharpened again. Book online at https://www.russellsmobileblade.com/book or call/text 985-295-1163. Thank you!`);
             return <article className="customer-card" key={customerKey(latest)}>
               <div className="booking-card-heading"><div><p className="eyebrow">{history.length} visit{history.length === 1 ? "" : "s"}</p><h2>{latest.name}</h2><p>{latest.city}</p></div><strong>${paidTotal}</strong></div>
-              <div className={`reminder-status ${reminderDue ? "due" : "scheduled"}`}><strong>{reminderDue ? "Seasonal reminder due" : `Next reminder ${formatDate(reminderDueDate)}`}</strong>{latest.seasonalReminderSentAt && <small>Last reminder sent {new Date(latest.seasonalReminderSentAt).toLocaleDateString()}</small>}</div>
+              <div className={`reminder-status ${reminderDue ? "due" : "scheduled"}`}><strong>{reminderDue ? "Annual reminder due" : `Next annual reminder ${formatDate(reminderDueDate)}`}</strong>{latest.seasonalReminderSentAt && <small>Last reminder sent {new Date(latest.seasonalReminderSentAt).toLocaleDateString()}</small>}</div>
               <p><a href={`tel:${latest.phone}`}>{latest.phone}</a>{latest.email && <><br /><a href={`mailto:${latest.email}`}>{latest.email}</a></>}</p>
               <div className="history-list">{history.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5).map((item) => <div key={item.id}><span>{formatDate(item.date)}</span><b>{item.serviceName}</b><small>{item.status} · {item.paymentStatus}</small></div>)}</div>
-              <div className="card-actions"><a className="button primary small" href={`tel:${latest.phone}`}>Call</a><a className="button secondary small" href={`sms:${latest.phone}?body=${seasonalText}`}>Seasonal text</a>{latest.email && <button className="button secondary small" type="button" disabled={sendingSeasonalReminder === latest.id} onClick={() => sendSeasonalReminder(latest)}>{sendingSeasonalReminder === latest.id ? "Sending reminder..." : "Seasonal email"}</button>}</div>
+              <div className="card-actions"><a className="button primary small" href={`tel:${latest.phone}`}>Call</a><a className="button secondary small" href={`sms:${latest.phone}?body=${seasonalText}`}>Annual text</a>{latest.email && <button className="button secondary small" type="button" disabled={sendingSeasonalReminder === latest.id} onClick={() => sendSeasonalReminder(latest)}>{sendingSeasonalReminder === latest.id ? "Sending reminder..." : "Annual email"}</button>}</div>
             </article>;
           })}
         </section>

@@ -420,7 +420,7 @@ export default function AdminPage() {
       jobType: normalizedJobType,
       bladeCount: normalizedBladeCount,
       serviceDetail,
-      price: Math.max(30, servicePrice(normalizedJobType, booking.serviceId, normalizedBladeCount) + (normalizedJobType === "chainsaw-sharpening" && booking.chainRemoval ? 5 : 0)),
+      price: servicePrice(normalizedJobType, booking.serviceId, normalizedBladeCount) + (normalizedJobType === "chainsaw-sharpening" && booking.chainRemoval ? 5 : 0),
     });
   }
 

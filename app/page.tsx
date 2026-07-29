@@ -6,7 +6,7 @@ import BeforeAfterGallery from "@/components/BeforeAfterGallery";
 const services = [
   ["push-mower", "Push Mower", "$10/blade"],
   ["riding-mower", "Riding Mower", "$10/blade"],
-  ["zero-turn", "Zero Turn", "$20/blade"],
+  ["zero-turn", "Zero Turn", "$10/blade"],
   ["bush-hog", "Bush Hog", "$40/blade"],
 ];
 
@@ -46,7 +46,7 @@ export default function HomePage() {
         <div className="section-heading">
           <p className="eyebrow">Veteran Owned · Straightforward pricing</p>
           <h2>Sharpening services</h2>
-          <p className="section-lead">Push mower and riding mower blades are <strong>$10 per blade</strong>, zero-turn blades are <strong>$20 per blade</strong>, and Bush Hog blades are <strong>$40 per blade.</strong> Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
+          <p className="section-lead">Push mower, riding mower, and zero-turn blades are <strong>$10 per blade</strong>, and Bush Hog blades are <strong>$40 per blade.</strong> Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
           <p className="section-lead minimum-charge-notice"><strong>$30 minimum mobile-service charge applies to every appointment.</strong></p>
         </div>
         <div className="service-grid">

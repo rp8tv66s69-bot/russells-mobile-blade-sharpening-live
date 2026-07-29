@@ -76,7 +76,6 @@ function servicePrice(jobType: string, serviceId: string, bladeCount: number) {
     return ({ "chainsaw-up-to-16": 15, "chainsaw-18-20": 20, "chainsaw-24-28": 25, "chainsaw-32-36-plus": 30 } as Record<string, number>)[serviceId] || 0;
   }
   if (serviceId === "bush-hog") return bladeCount * 40;
-  if (serviceId === "zero-turn") return bladeCount * 20;
   return bladeCount * 10;
 }
 

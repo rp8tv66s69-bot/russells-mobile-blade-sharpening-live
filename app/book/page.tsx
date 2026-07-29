@@ -28,7 +28,6 @@ const chainsawBarSizes = [
 ];
 const chainPitchOptions = ['1/4"', '.325"', '3/8" low profile', '3/8"', '.404"', "Other / not sure"];
 const chainRemovalPrice = 5;
-const minimumServiceCharge = 30;
 const chainsawAvailableDate = "2026-07-31";
 const maintenanceAvailableDate = "2026-07-31";
 const maintenancePrices: Record<string, number> = {
@@ -85,10 +84,6 @@ function pricePerBlade(jobType: string, mowerType: string) {
   if (jobType === "blade-changing") return mowerType === "bush-hog" ? 25 : 10;
   if (mowerType === "bush-hog") return 40;
   return 10;
-}
-
-function withMinimumCharge(price: number) {
-  return price > 0 ? Math.max(minimumServiceCharge, price) : 0;
 }
 
 const times = [
@@ -382,10 +377,10 @@ export default function BookingPage() {
       filterType: selectedJobType === "maintenance" ? selectedFilterType : "",
       price:
         selectedJobType === "maintenance"
-          ? withMinimumCharge(maintenancePrices[selectedService.id])
+          ? maintenancePrices[selectedService.id]
           : selectedJobType === "chainsaw-sharpening"
-            ? withMinimumCharge((selectedChainsawService?.price || 0) + (chainRemoval ? chainRemovalPrice : 0))
-            : withMinimumCharge(selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id)),
+            ? (selectedChainsawService?.price || 0) + (chainRemoval ? chainRemovalPrice : 0)
+            : selectedBladeCount * pricePerBlade(selectedJobType, selectedService.id),
       date,
       time,
       notes: String(form.get("notes") || "").trim(),
@@ -777,12 +772,12 @@ export default function BookingPage() {
             ) : isChainsaw ? (
               <>
                 <span>{selectedChainsawSize ? `${selectedChainsawSize.name}${chainRemoval ? " + $5 chain removal" : ""}` : "Select a bar size to see pricing"}</span>
-                <strong>Total: ${withMinimumCharge((selectedChainsawSize?.price || 0) + (selectedChainsawSize && chainRemoval ? chainRemovalPrice : 0))}</strong>
+                <strong>Total: ${(selectedChainsawSize?.price || 0) + (selectedChainsawSize && chainRemoval ? chainRemovalPrice : 0)}</strong>
               </>
             ) : (
               <>
                 <span>{bladeCount ? `${bladeCount} × $${currentPricePerBlade} per blade` : jobType ? `$${currentPricePerBlade} per blade` : "Select a service to see pricing"}</span>
-                <strong>Total: ${withMinimumCharge(bladeCount * currentPricePerBlade)}</strong>
+                <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
               </>
             )}
           </div>
@@ -795,7 +790,6 @@ export default function BookingPage() {
               <ul>
                 <li>Mower blades: $10 per blade</li>
                 <li>Bush Hog blades: $20 per blade</li>
-                <li className="minimum-charge-notice"><strong>$30 minimum mobile-service charge applies</strong></li>
               </ul>
             </div>
           ) : jobType === "blade-changing" ? (
@@ -955,7 +949,7 @@ export default function BookingPage() {
         <section className="submit-panel">
           <div>
             <strong>No payment is due online.</strong>
-            <p><strong className="minimum-charge-notice">$30 minimum mobile-service charge.</strong> Pay after service with Cash, Cash App, or Venmo.</p>
+            <p>Pay after service with Cash, Cash App, or Venmo.</p>
           </div>
 
           <button className="button primary" type="submit" disabled={saving}>

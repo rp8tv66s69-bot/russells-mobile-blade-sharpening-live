@@ -28,8 +28,6 @@ const chainsawBarSizes = [
 ];
 const chainPitchOptions = ['1/4"', '.325"', '3/8" low profile', '3/8"', '.404"', "Other / not sure"];
 const chainRemovalPrice = 5;
-const chainsawAvailableDate = "2026-07-31";
-const maintenanceAvailableDate = "2026-07-31";
 const maintenancePrices: Record<string, number> = {
   "push-mower": 35,
   "riding-mower": 45,
@@ -335,12 +333,6 @@ export default function BookingPage() {
 
     const date = String(form.get("date") || "");
     const time = String(form.get("time") || "");
-
-    if (selectedJobType === "chainsaw-sharpening" && date < chainsawAvailableDate) {
-      setError("Chainsaw chain sharpening is available beginning July 31, 2026.");
-      setSaving(false);
-      return;
-    }
 
     const booking: Booking = {
       id: slotId(date, time),
@@ -767,7 +759,7 @@ export default function BookingPage() {
             {isMaintenance ? (
               <>
                 <span>{selectedMowerType ? "Labor price · parts additional" : "Select equipment to see maintenance pricing"}</span>
-                <strong>{selectedMowerType ? `Starting at $${maintenanceLaborPrice}` : "Available July 31"}</strong>
+                <strong>{selectedMowerType ? `Starting at $${maintenanceLaborPrice}` : "Select equipment"}</strong>
               </>
             ) : isChainsaw ? (
               <>
@@ -841,20 +833,12 @@ export default function BookingPage() {
                   <option
                     key={dateValue(date)}
                     value={dateValue(date)}
-                    disabled={
-                      blockedDates.has(dateValue(date)) ||
-                      (isMaintenance && dateValue(date) < maintenanceAvailableDate) ||
-                      (isChainsaw && dateValue(date) < chainsawAvailableDate)
-                    }
+                    disabled={blockedDates.has(dateValue(date))}
                   >
                     {formatDate(date)}
                     {blockedDates.has(dateValue(date))
                       ? " (Unavailable)"
-                      : isMaintenance && dateValue(date) < maintenanceAvailableDate
-                        ? " (Basic Maintenance begins July 31)"
-                        : isChainsaw && dateValue(date) < chainsawAvailableDate
-                          ? " (Chainsaw sharpening begins July 31)"
-                        : ""}
+                      : ""}
                   </option>
                 ))}
               </select>

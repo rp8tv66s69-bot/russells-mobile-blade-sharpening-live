@@ -25,13 +25,13 @@ export default function HomePage() {
           className="sunset-hero-image"
         />
         <div className="sunset-hotspots" aria-label="Hero actions">
-          <Link className="hero-hotspot hero-hotspot-book" href="/book">Book an appointment</Link>
+          <Link className="hero-hotspot hero-hotspot-book" href="/schedule">Book an appointment</Link>
           <a className="hero-hotspot hero-hotspot-call" href="tel:+19852951163">Call or text Russell</a>
         </div>
       </section>
 
       <section className="mobile-hero-actions page-width">
-        <Link className="button orange" href="/book">Book an appointment</Link>
+        <Link className="button orange" href="/schedule">Book an appointment</Link>
         <a className="button black" href="tel:+19852951163">Call 985-295-1163</a>
       </section>
 
@@ -45,7 +45,7 @@ export default function HomePage() {
           {services.map(([id, name, price]) => (
             <Link
               className="service-card service-card-link"
-              href={`/book?jobType=sharpening&service=${id}`}
+              href={`/schedule?jobType=sharpening&service=${id}`}
               key={id}
               aria-label={`Book ${name} blade sharpening`}
             >
@@ -58,28 +58,28 @@ export default function HomePage() {
           <p>Prices and important details are shown before you book.</p>
         </div>
         <div className="extra-service-grid">
-          <Link className="compact-service-card" href="/book?jobType=loose-blade-sharpening">
+          <Link className="compact-service-card" href="/schedule?jobType=loose-blade-sharpening">
             <span>Already removed</span>
             <h3>Loose or spare blades</h3>
             <strong>Mower $10 · Bush Hog $20 per blade</strong>
             <p>Blades must be removed from the equipment.</p>
             <b>Book this service →</b>
           </Link>
-          <Link className="compact-service-card" href="/book?jobType=blade-changing">
+          <Link className="compact-service-card" href="/schedule?jobType=blade-changing">
             <span>Removal and installation</span>
             <h3>Blade changing</h3>
             <strong>Mower $10 · Bush Hog $25 per blade</strong>
             <p>Supply the blades or pay parts cost plus 15% sourcing and handling ($10 minimum).</p>
             <b>Book this service →</b>
           </Link>
-          <Link className="compact-service-card" href="/book?jobType=chainsaw-sharpening">
+          <Link className="compact-service-card" href="/schedule?jobType=chainsaw-sharpening">
             <span>Based on bar size</span>
             <h3>Chainsaw chains</h3>
             <strong>$15–$30 per chain</strong>
             <p>Add $5 when Russell removes and reinstalls the chain.</p>
             <b>Book this service →</b>
           </Link>
-          <Link className="compact-service-card" href="/book?jobType=maintenance">
+          <Link className="compact-service-card" href="/schedule?jobType=maintenance">
             <span>Labor plus parts</span>
             <h3>Basic Maintenance</h3>
             <strong>Push $35 · Riding/Zero Turn $45 · Tractor $80</strong>
@@ -104,7 +104,7 @@ export default function HomePage() {
 
       <section className="section page-width contact-card">
         <div><p className="eyebrow">Ready to schedule?</p><h2>Choose a service and time.</h2><p>Russell will contact you to confirm your appointment.</p></div>
-        <div className="hero-actions"><Link className="button orange" href="/book">Book online</Link><a className="button secondary" href="sms:+19852951163">Text Russell</a></div>
+        <div className="hero-actions"><Link className="button orange" href="/schedule">Book online</Link><a className="button secondary" href="sms:+19852951163">Text Russell</a></div>
       </section>
       <footer className="footer">Russell&apos;s Mobile Blade Sharpening · <a href="mailto:russellsmobileblade@gmail.com">russellsmobileblade@gmail.com</a> · <a href="tel:+19852951163">985-295-1163</a></footer>
     </main>

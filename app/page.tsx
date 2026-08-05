@@ -7,6 +7,7 @@ const services = [
   ["push-mower", "Push Mower", "$10/blade"],
   ["riding-mower", "Riding Mower", "$10/blade"],
   ["zero-turn", "Zero Turn", "$10/blade"],
+  ["grooming-mower", "Grooming Mower", "$10/blade"],
   ["bush-hog", "Bush Hog", "$40/blade"],
 ];
 

@@ -98,7 +98,6 @@ export default function HomePage() {
           <div className="blade-change-heading">
             <p className="eyebrow">Additional sharpening service</p>
             <h3>Chainsaw chain sharpening</h3>
-            <p className="service-launch-inline"><strong>Available beginning July 31, 2026</strong></p>
             <p>Pricing is based on the chainsaw bar size. Bring the chain off the saw, or Russell can remove and reinstall it for an additional $5.</p>
           </div>
           <div className="blade-change-rates" aria-label="Chainsaw chain sharpening prices">
@@ -126,7 +125,6 @@ export default function HomePage() {
         <div className="section-heading">
           <p className="eyebrow">New service</p>
           <h2>Basic Maintenance</h2>
-          <p className="service-launch-inline"><strong>Available beginning July 31, 2026</strong></p>
           <p className="section-lead">Routine maintenance at your location includes an engine-oil change, applicable oil and air filters, and applicable spark plugs. Prices shown are for labor; oil, filters, spark plugs, and other parts are additional.</p>
         </div>
         <div className="service-grid">
@@ -138,7 +136,6 @@ export default function HomePage() {
           ))}
         </div>
         <div className="maintenance-notice">
-          <strong>Appointments begin Friday, July 31, 2026.</strong>
           <p>Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customers may provide compatible parts; customer-supplied parts are not covered by a parts warranty.</p>
           <p>Please provide the equipment make and model when booking. Additional repairs require customer approval.</p>
           <Link className="button orange" href="/book?jobType=maintenance">Request Basic Maintenance</Link>

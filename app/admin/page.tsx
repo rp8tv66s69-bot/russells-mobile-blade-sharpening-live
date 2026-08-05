@@ -581,7 +581,7 @@ export default function AdminPage() {
           <p className="muted">Signed in as {user.email}</p>
         </div>
         <div className="hero-actions">
-          <a className="button secondary" href="/book">New booking</a>
+          <a className="button secondary" href="/schedule">New booking</a>
           <button className="button dark" onClick={() => signOut(auth)}>Sign out</button>
         </div>
       </header>
@@ -727,7 +727,7 @@ export default function AdminPage() {
             const paidTotal = history.filter((item) => item.paymentStatus === "Paid").reduce((sum, item) => sum + Number(item.price || 0), 0);
             const reminderDueDate = addMonths(latest.date, 12);
             const reminderDue = latest.status === "Completed" && reminderDueDate <= today;
-            const seasonalText = encodeURIComponent(`Hi ${latest.name}, this is Russell's Mobile Blade Sharpening. It has been about a year since your last service and may be time to have your mower blades sharpened again. Book online at https://www.russellsmobileblade.com/book or call/text 985-295-1163. Thank you!`);
+            const seasonalText = encodeURIComponent(`Hi ${latest.name}, this is Russell's Mobile Blade Sharpening. It has been about a year since your last service and may be time to have your mower blades sharpened again. Book online at https://www.russellsmobileblade.com/schedule or call/text 985-295-1163. Thank you!`);
             return <article className="customer-card" key={customerKey(latest)}>
               <div className="booking-card-heading"><div><p className="eyebrow">{history.length} visit{history.length === 1 ? "" : "s"}</p><h2>{latest.name}</h2><p>{latest.city}</p></div><strong>${paidTotal}</strong></div>
               <div className={`reminder-status ${reminderDue ? "due" : "scheduled"}`}><strong>{reminderDue ? "Annual reminder due" : `Next annual reminder ${formatDate(reminderDueDate)}`}</strong>{latest.seasonalReminderSentAt && <small>Last reminder sent {new Date(latest.seasonalReminderSentAt).toLocaleDateString()}</small>}</div>

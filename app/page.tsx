@@ -10,13 +10,6 @@ const services = [
   ["bush-hog", "Bush Hog", "$40/blade"],
 ];
 
-const maintenanceServices = [
-  ["Push Mower", "$35 + parts"],
-  ["Riding Mower", "$45 + parts"],
-  ["Zero Turn", "$45 + parts"],
-  ["Tractor", "$80 + parts"],
-];
-
 export default function HomePage() {
   return (
     <main>
@@ -45,8 +38,8 @@ export default function HomePage() {
       <section className="section page-width" id="services">
         <div className="section-heading">
           <p className="eyebrow">Veteran Owned · Straightforward pricing</p>
-          <h2>Sharpening services</h2>
-          <p className="section-lead">Push mower, riding mower, and zero-turn blades are <strong>$10 per blade</strong>, and Bush Hog blades are <strong>$40 per blade.</strong> Mobile service throughout Washington Parish, St. Tammany Parish, and Tangipahoa Parish every Friday and Saturday.</p>
+          <h2>Choose a service</h2>
+          <p className="section-lead">Tap the service you need to begin booking. Russell provides mobile service throughout Washington, St. Tammany, and Tangipahoa Parishes.</p>
         </div>
         <div className="service-grid">
           {services.map(([id, name, price]) => (
@@ -60,99 +53,57 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
-        <article className="blade-change-callout">
-          <div className="blade-change-heading">
-            <p className="eyebrow">Bring extra blades</p>
-            <h3>Loose or spare blade sharpening</h3>
-            <p>Blades that are already removed from the equipment can be sharpened at a reduced price.</p>
-          </div>
-          <div className="blade-change-rates" aria-label="Loose blade sharpening price">
-            <div><span>Mower blades</span><strong>$10</strong><small>per blade</small></div>
-            <div><span>Bush Hog blades</span><strong>$20</strong><small>per blade</small></div>
-          </div>
-          <div className="blade-change-details">
-            <p><strong>Please have blades removed before the appointment.</strong></p>
-          </div>
-          <Link className="button orange" href="/book?jobType=loose-blade-sharpening">Book loose blade sharpening</Link>
-        </article>
-        <article className="blade-change-callout">
-          <div className="blade-change-heading">
-            <p className="eyebrow">Additional service</p>
-            <h3>Blade changing only</h3>
-            <p>Old blades are removed and replacement blades are installed at your location.</p>
-          </div>
-          <div className="blade-change-rates" aria-label="Blade changing prices">
-            <div><span>Mower blades</span><strong>$10</strong><small>per blade</small></div>
-            <div><span>Bush Hog blades</span><strong>$25</strong><small>per blade</small></div>
-          </div>
-          <div className="blade-change-details">
-            <p><strong>Replacement blade options</strong></p>
-            <ul>
-              <li>Supply your own compatible replacement blades</li>
-              <li>Russell can provide blades at the parts cost plus a 15% sourcing and handling charge ($10 minimum)</li>
-            </ul>
-          </div>
-          <Link className="button orange" href="/book?jobType=blade-changing">Book blade changing</Link>
-        </article>
-        <article className="blade-change-callout">
-          <div className="blade-change-heading">
-            <p className="eyebrow">Additional sharpening service</p>
-            <h3>Chainsaw chain sharpening</h3>
-            <p>Pricing is based on the chainsaw bar size. Bring the chain off the saw, or Russell can remove and reinstall it for an additional $5.</p>
-          </div>
-          <div className="blade-change-rates" aria-label="Chainsaw chain sharpening prices">
-            <div><span>Up to 16&quot;</span><strong>$15</strong></div>
-            <div><span>18&quot;–20&quot;</span><strong>$20</strong></div>
-            <div><span>24&quot;–28&quot;</span><strong>$25</strong></div>
-            <div><span>32&quot;–36&quot;+</span><strong>$30</strong></div>
-          </div>
-          <div className="blade-change-details">
-            <p><strong>Chain removal and reinstallation</strong></p>
-            <ul>
-              <li>Customers select the chain pitch when booking</li>
-              <li>Add $5 when the chain is still installed on the saw</li>
-            </ul>
-          </div>
-          <Link className="button orange" href="/book?jobType=chainsaw-sharpening">Book chainsaw sharpening</Link>
-        </article>
+        <div className="more-services-heading">
+          <h3>More services</h3>
+          <p>Prices and important details are shown before you book.</p>
+        </div>
+        <div className="extra-service-grid">
+          <Link className="compact-service-card" href="/book?jobType=loose-blade-sharpening">
+            <span>Already removed</span>
+            <h3>Loose or spare blades</h3>
+            <strong>Mower $10 · Bush Hog $20 per blade</strong>
+            <p>Blades must be removed from the equipment.</p>
+            <b>Book this service →</b>
+          </Link>
+          <Link className="compact-service-card" href="/book?jobType=blade-changing">
+            <span>Removal and installation</span>
+            <h3>Blade changing</h3>
+            <strong>Mower $10 · Bush Hog $25 per blade</strong>
+            <p>Supply the blades or pay parts cost plus 15% sourcing and handling ($10 minimum).</p>
+            <b>Book this service →</b>
+          </Link>
+          <Link className="compact-service-card" href="/book?jobType=chainsaw-sharpening">
+            <span>Based on bar size</span>
+            <h3>Chainsaw chains</h3>
+            <strong>$15–$30 per chain</strong>
+            <p>Add $5 when Russell removes and reinstalls the chain.</p>
+            <b>Book this service →</b>
+          </Link>
+          <Link className="compact-service-card" href="/book?jobType=maintenance">
+            <span>Labor plus parts</span>
+            <h3>Basic Maintenance</h3>
+            <strong>Push $35 · Riding/Zero Turn $45 · Tractor $80</strong>
+            <p>Oil, applicable filters, and spark plug. Russell-supplied parts include 15% sourcing and handling ($10 minimum).</p>
+            <b>Book this service →</b>
+          </Link>
+        </div>
         <p className="custom-service-caption home-custom-service-caption">
           Need something other than the services listed?{" "}
           <a href="sms:+19852951163">Let me know.</a>
         </p>
       </section>
 
-      <section className="section page-width maintenance-section" id="maintenance">
-        <div className="section-heading">
-          <p className="eyebrow">New service</p>
-          <h2>Basic Maintenance</h2>
-          <p className="section-lead">Routine maintenance at your location includes an engine-oil change, applicable oil and air filters, and applicable spark plugs. Prices shown are for labor; oil, filters, spark plugs, and other parts are additional.</p>
-        </div>
-        <div className="service-grid">
-          {maintenanceServices.map(([name, price]) => (
-            <article className="service-card maintenance-card" key={name}>
-              <div><h3>{name}</h3><p>Oil, filters, and spark plug when applicable</p></div>
-              <strong>{price}</strong>
-            </article>
-          ))}
-        </div>
-        <div className="maintenance-notice">
-          <p>Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customers may provide compatible parts; customer-supplied parts are not covered by a parts warranty.</p>
-          <p>Please provide the equipment make and model when booking. Additional repairs require customer approval.</p>
-          <Link className="button orange" href="/book?jobType=maintenance">Request Basic Maintenance</Link>
-        </div>
-      </section>
-
       <section className="section band">
         <div className="page-width split">
-          <div><p className="eyebrow light">Veteran Owned · Mobile convenience</p><h2>Stay home. Russell brings the sharpening service to you.</h2></div>
-          <div className="check-list"><p>✓ Veteran owned and operated</p><p>✓ Friday and Saturday appointments</p><p>✓ Washington, St. Tammany, and Tangipahoa Parishes</p><p>✓ Appointment confirmation after booking</p><p>✓ Cash, Cash App, or Venmo after service</p></div>
+          <div><p className="eyebrow light">Veteran Owned · Mobile convenience</p><h2>Mobile service made simple.</h2></div>
+          <div className="check-list"><p>✓ Russell comes to your location</p><p>✓ Friday and Saturday appointments</p><p>✓ Washington, St. Tammany, and Tangipahoa Parishes</p><p>✓ Pay after service with Cash, Cash App, or Venmo</p></div>
         </div>
       </section>
 
       <BeforeAfterGallery />
 
       <section className="section page-width contact-card">
-        <div><p className="eyebrow">Ready for a cleaner cut?</p><h2>Schedule your blades today.</h2><p>Your blades will be sharpened on site and ready for healthier, cleaner-looking grass.</p></div>
+        <div><p className="eyebrow">Ready to schedule?</p><h2>Choose a service and time.</h2><p>Russell will contact you to confirm your appointment.</p></div>
         <div className="hero-actions"><Link className="button orange" href="/book">Book online</Link><a className="button secondary" href="sms:+19852951163">Text Russell</a></div>
       </section>
       <footer className="footer">Russell&apos;s Mobile Blade Sharpening · <a href="mailto:russellsmobileblade@gmail.com">russellsmobileblade@gmail.com</a> · <a href="tel:+19852951163">985-295-1163</a></footer>

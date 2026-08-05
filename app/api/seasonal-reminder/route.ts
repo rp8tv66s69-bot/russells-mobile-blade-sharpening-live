@@ -82,7 +82,7 @@ export async function POST(request: Request) {
             <p>Hi ${safeName},</p>
             <p>It has been about a year since your last service and may be time to have your mower blades sharpened again. Sharp blades give grass a cleaner cut and help your lawn look its best.</p>
             <p>Your last recorded service was <strong>${safeService}</strong> on <strong>${safeDate}</strong>.</p>
-            <p><a href="https://www.russellsmobileblade.com/book" style="display:inline-block;background:#167331;color:#fff;text-decoration:none;font-weight:700;padding:13px 20px;border-radius:10px">Book your next sharpening</a></p>
+            <p><a href="https://www.russellsmobileblade.com/schedule" style="display:inline-block;background:#167331;color:#fff;text-decoration:none;font-weight:700;padding:13px 20px;border-radius:10px">Book your next sharpening</a></p>
             <p>You can also call or text <a href="tel:+19852951163" style="color:#167331;font-weight:700">985-295-1163</a>.</p>
             <p style="margin-bottom:0">Thank you,<br><strong>Russell</strong><br>Russell's Mobile Blade Sharpening</p>
           </div>

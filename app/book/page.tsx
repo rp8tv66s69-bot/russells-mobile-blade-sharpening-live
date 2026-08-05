@@ -11,11 +11,12 @@ const mowerTypes = [
   { id: "push-mower", name: "Push Mower" },
   { id: "riding-mower", name: "Riding Mower" },
   { id: "zero-turn", name: "Zero Turn" },
+  { id: "grooming-mower", name: "Grooming Mower" },
   { id: "bush-hog", name: "Bush Hog" },
   { id: "tractor", name: "Tractor" },
 ];
 
-const bladeQuantities = [1, 2, 3, 4, 5, 6];
+const bladeQuantities = Array.from({ length: 20 }, (_, index) => index + 1);
 const looseBladeTypes = [
   { id: "loose-blades", name: "Mower blade", price: 10 },
   { id: "loose-bush-hog-blades", name: "Bush Hog blade", price: 20 },
@@ -228,7 +229,7 @@ export default function BookingPage() {
           : mowerTypes
             .filter((mower) =>
               requestedJobType === "maintenance"
-                ? mower.id !== "bush-hog"
+                ? maintenancePrices[mower.id] !== undefined
                 : mower.id !== "tractor"
             )
             .map((mower) => mower.id);
@@ -628,7 +629,7 @@ export default function BookingPage() {
                   {(isChainsaw
                     ? chainsawBarSizes
                     : mowerTypes.filter((mower) =>
-                      isMaintenance ? mower.id !== "bush-hog" : mower.id !== "tractor"
+                      isMaintenance ? maintenancePrices[mower.id] !== undefined : mower.id !== "tractor"
                     )
                   ).map((service) => (
                     <option key={service.id} value={service.id}>{service.name}</option>

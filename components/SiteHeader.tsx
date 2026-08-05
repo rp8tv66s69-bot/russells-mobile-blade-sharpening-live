@@ -12,7 +12,7 @@ export default function SiteHeader() {
         <Link href="/#services">Services</Link>
         <Link href="/#gallery">Before &amp; After</Link>
         <a href="tel:+19852951163">Contact</a>
-        <Link className="nav-book" href="/book">Book now</Link>
+        <Link className="nav-book" href="/schedule">Book now</Link>
         <Link className="nav-admin" href="/login">Owner</Link>
       </nav>
     </header>

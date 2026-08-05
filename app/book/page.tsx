@@ -195,6 +195,16 @@ export default function BookingPage() {
   const engineModelValue = engineModel === otherOption ? customEngineModel.trim() : engineModel;
   const availableEquipmentModels = equipmentMake ? [...(equipmentModels[equipmentMake] || []), otherOption] : [];
   const availableEngineModels = engineMake ? [...(engineModels[engineMake] || []), otherOption] : [];
+  const serviceReady = Boolean(
+    jobType &&
+    selectedMowerType &&
+    (isMaintenance
+      ? equipmentMakeValue && equipmentModelValue && engineMakeValue && engineModelValue && filterType
+      : isChainsaw
+        ? chainPitch
+        : bladeCount > 0 && (jobType !== "blade-changing" || bladeSupplier))
+  );
+  const scheduleReady = Boolean(serviceReady && selectedDate && selectedTime);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -539,11 +549,16 @@ export default function BookingPage() {
 
       <section className="booking-intro">
         <p className="eyebrow">Veteran Owned · Online appointment request</p>
-        <h1>Book mobile blade or Basic Maintenance service</h1>
+        <h1>Book your service</h1>
         <p>
-          Friday and Saturday, 8:00 AM–5:00 PM throughout Washington Parish,
-          St. Tammany Parish, and Tangipahoa Parish.
+          Choose a service, pick an available time, and send your request.
+          Russell will contact you to confirm it.
         </p>
+        <div className="booking-progress" aria-label="Booking steps">
+          <span className="active">1 Service</span>
+          <span className={serviceReady ? "active" : ""}>2 Time</span>
+          <span className={scheduleReady ? "active" : ""}>3 Details</span>
+        </div>
       </section>
 
       <form className="booking-form" onSubmit={handleSubmit}>
@@ -551,8 +566,8 @@ export default function BookingPage() {
           <div className="form-section-heading">
             <span>1</span>
             <div>
-              <h2>Choose your service and equipment</h2>
-              <p>Maintenance prices are labor only; oil, filters, spark plugs, and other parts are additional.</p>
+              <h2>What do you need?</h2>
+              <p>Select your service and equipment.</p>
             </div>
           </div>
 
@@ -583,7 +598,7 @@ export default function BookingPage() {
               </select>
             </label>
 
-            {isLooseBlades ? (
+            {jobType && (isLooseBlades ? (
               <label>
                 <span>Loose blade type *</span>
                 <select
@@ -620,7 +635,7 @@ export default function BookingPage() {
                   ))}
                 </select>
               </label>
-            )}
+            ))}
 
             {isMaintenance ? (
               <>
@@ -681,7 +696,7 @@ export default function BookingPage() {
                   </select>
                 </label>
               </>
-            ) : !isChainsaw ? (
+            ) : jobType && !isChainsaw ? (
               <label>
                 <span>Number of blades *</span>
                 <select name="bladeCount" required value={bladeCount || ""} onChange={(event) => setBladeCount(Number(event.target.value))}>
@@ -755,7 +770,7 @@ export default function BookingPage() {
             </fieldset>
           )}
 
-          <div className="price-calculation" aria-live="polite">
+          {jobType && <div className="price-calculation" aria-live="polite">
             {isMaintenance ? (
               <>
                 <span>{selectedMowerType ? "Labor price · parts additional" : "Select equipment to see maintenance pricing"}</span>
@@ -772,7 +787,7 @@ export default function BookingPage() {
                 <strong>Total: ${bladeCount * currentPricePerBlade}</strong>
               </>
             )}
-          </div>
+          </div>}
           {isMaintenance ? (
             <p className="custom-service-caption">Russell-supplied parts include a 15% sourcing and handling charge, with a $10 minimum. Customer-supplied compatible parts are not covered by a parts warranty.</p>
           ) : isLooseBlades ? (
@@ -801,11 +816,11 @@ export default function BookingPage() {
           </p>
         </section>
 
-        <section className="form-card">
+        {serviceReady && <section className="form-card">
           <div className="form-section-heading">
             <span>2</span>
             <div>
-              <h2>Select a date and time</h2>
+              <h2>When should Russell come?</h2>
               <p>
                 {bladeSupplier === "Russell supplied"
                   ? "Choose your preferred Friday or Saturday. Russell will confirm the final date after the replacement blades arrive."
@@ -864,14 +879,14 @@ export default function BookingPage() {
               </select>
             </label>
           </div>
-        </section>
+        </section>}
 
-        <section className="form-card">
+        {scheduleReady && <section className="form-card">
           <div className="form-section-heading">
             <span>3</span>
             <div>
-              <h2>Your information</h2>
-              <p>Russell will use this information to confirm your visit.</p>
+              <h2>How can Russell reach you?</h2>
+              <p>Enter your contact information and service address.</p>
             </div>
           </div>
 
@@ -923,14 +938,14 @@ export default function BookingPage() {
               />
             </label>
           </div>
-        </section>
+        </section>}
 
-        {error && (
+        {scheduleReady && error && (
           <p className="form-error" role="alert">
             {error}
           </p>
         )}
-        <section className="submit-panel">
+        {scheduleReady && <section className="submit-panel">
           <div>
             <strong>No payment is due online.</strong>
             <p>Pay after service with Cash, Cash App, or Venmo.</p>
@@ -939,7 +954,7 @@ export default function BookingPage() {
           <button className="button primary" type="submit" disabled={saving}>
             {saving ? "Reserving appointment..." : "Request appointment"}
           </button>
-        </section>
+        </section>}
       </form>
     </main>
   );
